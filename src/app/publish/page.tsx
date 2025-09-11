@@ -20,6 +20,7 @@ export default function PublishPage() {
   const [transcript, setTranscript] = useState('');
   const [articleTitle, setArticleTitle] = useState('');
   const [articleContent, setArticleContent] = useState('');
+  const [images, setImages] = useState<string[]>([]);
   const [notes] = useState('');
   const [error, setError] = useState('');
   const [isPublished, setIsPublished] = useState(false);
@@ -34,6 +35,10 @@ export default function PublishPage() {
 
   const handleTranscriptChange = (newTranscript: string) => {
     setTranscript(newTranscript);
+  };
+
+  const handleImagesChange = (newImages: string[]) => {
+    setImages(newImages);
   };
 
   const handleEnhanced = (title: string, content: string) => {
@@ -87,7 +92,7 @@ export default function PublishPage() {
         body: JSON.stringify({
           title: articleTitle,
           content: articleContent,
-          images: [], // TODO: Add image support
+          images: images,
           author: 'Staff Reporter',
           category: 'Business'
         }),
@@ -427,7 +432,7 @@ export default function PublishPage() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   Add Images
                 </h3>
-                <ImageUploader />
+                <ImageUploader images={images} onImagesChange={handleImagesChange} />
               </div>
               
               <div className="flex justify-center space-x-4">

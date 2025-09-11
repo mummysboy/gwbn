@@ -125,7 +125,6 @@ CRITICAL REQUIREMENTS:
         } else {
           // Content spans multiple lines - collect until we find the closing brace
           const contentLines = [];
-          const braceCount = 0;
           let inContent = false;
           
           for (let i = contentStartIndex; i < lines.length; i++) {
@@ -194,7 +193,7 @@ Looking ahead, the business owners outlined their vision for continued growth an
 
 This story highlights the important role that small businesses play in building strong, vibrant communities. Their success contributes not only to the local economy but also to the social fabric of the area, serving as an inspiration to others considering starting their own ventures.
 
-For more information about local business opportunities and community development, residents are encouraged to stay connected with local business associations and economic development organizations.${notes ? `\n\nAdditional Context: ${notes}` : ''}`
+For more information about local business opportunities and community development, residents are encouraged to stay connected with local business associations and economic development organizations.`
     };
     
     return NextResponse.json({ 

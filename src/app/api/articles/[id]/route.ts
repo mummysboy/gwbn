@@ -74,10 +74,11 @@ const articles: Array<{
 // GET /api/articles/[id] - Get a specific article
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const article = articles.find(a => a.id === params.id);
+    const { id } = await params;
+    const article = articles.find(a => a.id === id);
     
     if (!article) {
       return NextResponse.json(
@@ -103,13 +104,14 @@ export async function GET(
 // PUT /api/articles/[id] - Update an article
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { title, content, images, author, category } = body;
     
-    const articleIndex = articles.findIndex(a => a.id === params.id);
+    const articleIndex = articles.findIndex(a => a.id === id);
     
     if (articleIndex === -1) {
       return NextResponse.json(
@@ -148,10 +150,11 @@ export async function PUT(
 // DELETE /api/articles/[id] - Delete an article
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const articleIndex = articles.findIndex(a => a.id === params.id);
+    const { id } = await params;
+    const articleIndex = articles.findIndex(a => a.id === id);
     
     if (articleIndex === -1) {
       return NextResponse.json(
