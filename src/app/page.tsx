@@ -29,67 +29,36 @@ export default function Home() {
   const [featuredArticle, setFeaturedArticle] = useState<Article | null>(null);
 
   useEffect(() => {
-    // Sample articles with WSJ-style content
-    const sampleArticles: Article[] = [
-      {
-        id: '1',
-        title: 'Local Tech Startup Raises $2M in Series A Funding',
-        content: 'A local technology startup has successfully raised $2 million in Series A funding, marking a significant milestone for the company and the regional tech ecosystem. The funding round was led by prominent venture capital firms and will enable the company to expand its AI-powered platform and hire additional engineers.',
-        images: ['https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&h=300&fit=crop&crop=center'],
-        createdAt: new Date('2024-01-15'),
-        status: 'published',
-        author: 'Sarah Johnson',
-        category: 'Business',
-        readTime: 3
-      },
-      {
-        id: '2',
-        title: 'City Council Approves New Park Development Project',
-        content: 'The city council unanimously approved the development of a new 50-acre park in the downtown area. The project, which is expected to be completed by next summer, will include walking trails, playgrounds, and a community center. Local residents have expressed strong support for the initiative.',
-        images: ['https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop&crop=center'],
-        createdAt: new Date('2024-01-14'),
-        status: 'published',
-        author: 'Michael Chen',
-        category: 'Local News',
-        readTime: 4
-      },
-      {
-        id: '3',
-        title: 'Economic Indicators Show Strong Growth in Q4',
-        content: 'Recent economic data reveals robust growth in the fourth quarter, with key indicators pointing to continued expansion. Employment rates have reached new highs, while consumer spending remains strong despite global economic uncertainties.',
-        images: ['https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=300&fit=crop&crop=center'],
-        createdAt: new Date('2024-01-13'),
-        status: 'published',
-        author: 'David Rodriguez',
-        category: 'Economy',
-        readTime: 5
-      },
-      {
-        id: '4',
-        title: 'Healthcare System Implements New Technology Initiative',
-        content: 'The regional healthcare system has announced a comprehensive technology initiative aimed at improving patient care and operational efficiency. The program includes the implementation of advanced diagnostic tools and streamlined patient management systems.',
-        images: ['https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=300&fit=crop&crop=center'],
-        createdAt: new Date('2024-01-12'),
-        status: 'published',
-        author: 'Dr. Emily Watson',
-        category: 'Healthcare',
-        readTime: 4
-      },
-      {
-        id: '5',
-        title: 'Education Department Launches Digital Learning Platform',
-        content: 'The local education department has launched a new digital learning platform designed to enhance student engagement and provide personalized learning experiences. The initiative represents a significant investment in educational technology.',
-        images: ['https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=300&fit=crop&crop=center'],
-        createdAt: new Date('2024-01-11'),
-        status: 'published',
-        author: 'Lisa Thompson',
-        category: 'Education',
-        readTime: 3
+    // Fetch published articles from API
+    const fetchArticles = async () => {
+      try {
+        const response = await fetch('/api/articles?status=published');
+        const data = await response.json();
+        
+        if (data.success && data.articles) {
+          // Convert date strings back to Date objects
+          const articlesWithDates = data.articles.map((article: any) => ({
+            ...article,
+            createdAt: new Date(article.createdAt)
+          }));
+          
+          setArticles(articlesWithDates);
+          setFeaturedArticle(articlesWithDates[0] || null);
+        } else {
+          console.error('Failed to fetch articles:', data.error);
+          // Fallback to empty state
+          setArticles([]);
+          setFeaturedArticle(null);
+        }
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+        // Fallback to empty state
+        setArticles([]);
+        setFeaturedArticle(null);
       }
-    ];
+    };
     
-    setArticles(sampleArticles);
-    setFeaturedArticle(sampleArticles[0]);
+    fetchArticles();
   }, []);
 
 

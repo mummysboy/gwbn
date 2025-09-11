@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MicrophoneIcon, StopIcon, PlayIcon, PauseIcon } from '@heroicons/react/24/outline';
+import { MicrophoneIcon, StopIcon, PlayIcon, PauseIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 
 interface VoiceRecorderProps {
@@ -14,14 +14,23 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
   const [isPlaying, setIsPlaying] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
+    // Check for speech recognition support
+    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setSpeechSupported(true);
+    }
+    
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -65,11 +74,8 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
         
-        // Simulate transcription
-        setTimeout(() => {
-          const mockTranscript = generateMockTranscript();
-          onTranscript(mockTranscript);
-        }, 1000);
+        // Start transcription process
+        transcribeAudio(audioBlob);
       };
 
       mediaRecorder.start(100); // Collect data every 100ms
@@ -111,6 +117,42 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
         audioRef.current.play();
         setIsPlaying(true);
       }
+    }
+  };
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    setIsTranscribing(true);
+    
+    try {
+      // Create FormData to send the audio file
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+      
+      // Send to our transcription API
+      const response = await fetch('/api/transcribe', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('OpenAI transcription successful:', result.transcript);
+        onTranscript(result.transcript);
+      } else {
+        console.log('OpenAI transcription failed, using fallback:', result.transcript);
+        onTranscript(result.transcript);
+      }
+      
+    } catch (error) {
+      console.error('Transcription API error:', error);
+      onError('Failed to transcribe audio. Please try again.');
+      
+      // Fallback to mock transcript
+      const mockTranscript = generateMockTranscript();
+      onTranscript(mockTranscript);
+    } finally {
+      setIsTranscribing(false);
     }
   };
 
@@ -162,7 +204,10 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
             </span>
           </div>
         )}
+        
+        
       </div>
+
 
       {/* Audio Playback */}
       {audioUrl && (
@@ -199,18 +244,6 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
         </div>
       )}
 
-      {/* Recording Tips */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-2">
-          Recording Tips:
-        </h3>
-        <ul className="text-xs text-blue-800 dark:text-blue-400 space-y-1">
-          <li>• Speak clearly and at a moderate pace</li>
-          <li>• Hold your device steady while recording</li>
-          <li>• Find a quiet environment for best results</li>
-          <li>• Keep recordings under 5 minutes for optimal processing</li>
-        </ul>
-      </div>
     </div>
   );
 }

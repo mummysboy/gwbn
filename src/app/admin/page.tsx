@@ -14,14 +14,13 @@ import {
   CogIcon,
   ArrowTrendingUpIcon,
   ClockIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import Container from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
 import VoiceRecorder from '@/components/publishing/VoiceRecorder';
-import AIEnhancer from '@/components/publishing/AIEnhancer';
 import ImageUploader from '@/components/publishing/ImageUploader';
+import AIEnhancer from '@/components/publishing/AIEnhancer';
 import { getDefaultAuthor, calculateReadTime } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -43,30 +42,40 @@ export default function AdminDashboard() {
   const [title, setTitle] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [activeTab, setActiveTab] = useState<'publish' | 'dashboard'>('publish');
+  const [notes, setNotes] = useState('');
 
-  // Initialize with sample articles
+  // Fetch articles from API
   useEffect(() => {
-    const sampleArticles: Article[] = [
-      {
-        id: '1',
-        title: 'Breaking: Local Tech Startup Raises $2M',
-        content: 'A local technology startup has successfully raised $2 million in Series A funding. The company, founded by two university graduates, plans to use the funding to expand their AI-powered platform and hire additional engineers.',
-        images: ['https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&h=300&fit=crop&crop=center'],
-        createdAt: new Date('2024-01-15'),
-        status: 'published'
-      },
-      {
-        id: '2',
-        title: 'City Council Approves New Park Development',
-        content: 'The city council unanimously approved the development of a new 50-acre park in the downtown area. The project is expected to be completed by next summer and will include walking trails, playgrounds, and a community center.',
-        images: ['https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop&crop=center'],
-        createdAt: new Date('2024-01-14'),
-        status: 'published'
+    const fetchArticles = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/articles');
+        const data = await response.json();
+        
+        if (data.success && data.articles) {
+          // Convert date strings back to Date objects
+          const articlesWithDates = data.articles.map((article: Article) => ({
+            ...article,
+            createdAt: new Date(article.createdAt)
+          }));
+          
+          setArticles(articlesWithDates);
+        } else {
+          console.error('Failed to fetch articles:', data.error);
+          setArticles([]);
+        }
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+        setArticles([]);
+      } finally {
+        setLoading(false);
       }
-    ];
-    setArticles(sampleArticles);
+    };
+    
+    fetchArticles();
   }, []);
 
   // Mock data for dashboard
@@ -136,9 +145,6 @@ export default function AdminDashboard() {
     setTranscript(newTranscript);
   };
 
-  const handleEnhancedContent = (newContent: string) => {
-    setEnhancedContent(newContent);
-  };
 
   const handleImagesChange = (newImages: string[]) => {
     setImages(newImages);
@@ -148,29 +154,66 @@ export default function AdminDashboard() {
     alert(error);
   };
 
-  const publishArticle = () => {
+  const handleEnhanced = (title: string, content: string) => {
+    console.log('=== ADMIN HANDLE ENHANCED CALLED ===');
+    console.log('Admin handleEnhanced called with:', { title, content });
+    console.log('Title length:', title?.length);
+    console.log('Content length:', content?.length);
+    
+    // Set the title and content properly
+    setTitle(title);
+    setEnhancedContent(content);
+    
+    console.log('Admin state updated - title:', title);
+    console.log('Admin state updated - content length:', content?.length);
+    console.log('=== ADMIN HANDLE ENHANCED COMPLETE ===');
+  };
+
+  const publishArticle = async () => {
     if (!title.trim() || !enhancedContent.trim()) {
       alert('Please provide a title and content before publishing.');
       return;
     }
 
-    const newArticle: Article = {
-      id: Date.now().toString(),
-      title,
-      content: enhancedContent,
-      images,
-      createdAt: new Date(),
-      status: 'published',
-      author: getDefaultAuthor(),
-      category: 'Business',
-      readTime: calculateReadTime(enhancedContent)
-    };
+    try {
+      const response = await fetch('/api/articles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+          content: enhancedContent,
+          images,
+          author: getDefaultAuthor(),
+          category: 'Business'
+        }),
+      });
 
-    setArticles(prev => [newArticle, ...prev]);
-    setTitle('');
-    setTranscript('');
-    setEnhancedContent('');
-    setImages([]);
+      const data = await response.json();
+
+      if (data.success) {
+        // Add the new article to local state
+        const newArticle: Article = {
+          ...data.article,
+          createdAt: new Date(data.article.createdAt)
+        };
+        setArticles(prev => [newArticle, ...prev]);
+        
+        // Reset form
+        setTitle('');
+        setTranscript('');
+        setEnhancedContent('');
+        setImages([]);
+        
+        alert('Article published successfully!');
+      } else {
+        alert('Failed to publish article: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error publishing article:', error);
+      alert('Failed to publish article. Please try again.');
+    }
   };
 
   const deleteArticle = (id: string) => {
@@ -273,15 +316,48 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                {/* AI Enhancement */}
+                {/* Recorded Interview */}
                 {transcript && (
                   <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                      AI Enhancement
+                      Recorded Interview
+                    </h2>
+                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                      <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+                        {transcript}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes Section */}
+                {transcript && (
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                      Notes
+                    </h2>
+                    <textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Add your notes about the interview here..."
+                      className="w-full h-32 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    />
+                    <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                      Use this space to add your thoughts, observations, or additional context about the interview.
+                    </div>
+                  </div>
+                )}
+
+                {/* AI Article Generation */}
+                {transcript && (
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                      AI Article Generation
                     </h2>
                     <AIEnhancer 
                       transcript={transcript}
-                      onEnhanced={handleEnhancedContent}
+                      notes={notes}
+                      onEnhanced={handleEnhanced}
                     />
                   </div>
                 )}
@@ -375,7 +451,18 @@ export default function AdminDashboard() {
                   </h2>
                   
                   <div className="space-y-4">
-                    {articles.map((article) => (
+                    {loading ? (
+                      <div className="text-center py-8">
+                        <div className="inline-flex items-center">
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Loading articles...
+                        </div>
+                      </div>
+                    ) : (
+                      articles.map((article) => (
                       <div key={article.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div className="flex items-start justify-between mb-2">
                           <Link href={`/article/${article.id}`}>
@@ -418,9 +505,10 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       </div>
-                    ))}
+                    ))
+                    )}
                     
-                    {articles.length === 0 && (
+                    {!loading && articles.length === 0 && (
                       <p className="text-center text-gray-500 dark:text-gray-400 py-8">
                         No articles published yet. Record your voice and create your first article!
                       </p>

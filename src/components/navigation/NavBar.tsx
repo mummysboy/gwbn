@@ -7,18 +7,27 @@ import {
   Bars3Icon, 
   XMarkIcon,
   HomeIcon,
-  CogIcon
+  CogIcon,
+  PencilSquareIcon
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Home', href: '/', icon: HomeIcon },
+];
+
+const adminNavigation = [
+  { name: 'Publish', href: '/publish', icon: PencilSquareIcon },
   { name: 'Admin', href: '/admin', icon: CogIcon },
 ];
 
 export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  
+  // Determine if we're on an admin page
+  const isAdminPage = pathname.startsWith('/admin') || pathname.startsWith('/publish');
+  const currentNavigation = isAdminPage ? [...navigation, ...adminNavigation] : navigation;
 
   return (
     <nav className="bg-white border-b border-gray-300">
@@ -31,7 +40,7 @@ export default function NavBar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            {navigation.map((item) => {
+            {currentNavigation.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -68,7 +77,7 @@ export default function NavBar() {
         {isOpen && (
           <div className="md:hidden border-t border-gray-300">
             <div className="py-4 space-y-2">
-              {navigation.map((item) => {
+              {currentNavigation.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
