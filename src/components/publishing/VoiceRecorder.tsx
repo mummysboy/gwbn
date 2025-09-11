@@ -141,6 +141,9 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
         onTranscript(result.transcript);
       } else {
         console.log('OpenAI transcription failed, using fallback:', result.transcript);
+        if (result.error && result.error.includes('API key not configured')) {
+          console.warn('OpenAI API key not configured in environment variables');
+        }
         onTranscript(result.transcript);
       }
       
