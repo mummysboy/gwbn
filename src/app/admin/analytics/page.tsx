@@ -6,8 +6,8 @@ import {
   EyeIcon,
   UserGroupIcon,
   DocumentTextIcon,
-  TrendingUpIcon,
-  TrendingDownIcon
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon
 } from '@heroicons/react/24/outline';
 
 interface AnalyticsData {
@@ -88,7 +88,7 @@ export default function AnalyticsPage() {
     const isPositive = growth >= 0;
     return (
       <span className={`flex items-center text-sm ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-        {isPositive ? <TrendingUpIcon className="w-4 h-4 mr-1" /> : <TrendingDownIcon className="w-4 h-4 mr-1" />}
+        {isPositive ? <ArrowTrendingUpIcon className="w-4 h-4 mr-1" /> : <ArrowTrendingDownIcon className="w-4 h-4 mr-1" />}
         {Math.abs(growth).toFixed(1)}%
       </span>
     );
