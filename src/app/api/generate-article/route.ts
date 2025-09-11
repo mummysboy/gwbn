@@ -3,6 +3,39 @@ import OpenAI from 'openai';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if OpenAI API key is configured
+    if (!process.env.OPENAI_API_KEY) {
+      console.warn('OpenAI API key not configured, using fallback');
+      
+      // Return a fallback article if OpenAI API key is not configured
+      const fallbackArticle = {
+        title: 'Local Business Spotlight: Community Success Story',
+        content: `By Staff Reporter
+
+In a recent interview, local business owners shared insights about their entrepreneurial journey and the challenges they've overcome to serve their community.
+
+The discussion revealed the dedication and hard work that goes into running a successful small business, with owners emphasizing the importance of understanding local market needs and adapting their services accordingly.
+
+Key highlights from the interview include the business's growth trajectory and its impact on the local community. The owners discussed how they've become an integral part of the area, providing essential services and creating employment opportunities for residents.
+
+Like many small businesses, they've faced various obstacles including market competition and operational challenges. However, their commitment to quality service and customer satisfaction has helped them maintain a strong position in the community.
+
+Looking ahead, the business owners outlined their vision for continued growth and expansion, with plans to enhance their services and potentially create additional job opportunities in the area.
+
+This story highlights the important role that small businesses play in building strong, vibrant communities. Their success contributes not only to the local economy but also to the social fabric of the area, serving as an inspiration to others considering starting their own ventures.
+
+For more information about local business opportunities and community development, residents are encouraged to stay connected with local business associations and economic development organizations.`
+      };
+      
+      return NextResponse.json({ 
+        success: false,
+        title: fallbackArticle.title,
+        content: fallbackArticle.content,
+        error: 'OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.',
+        fallback: true
+      });
+    }
+
     // Initialize OpenAI client only when the function is called
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
