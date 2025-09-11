@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Container } from '@/components/layout/Container';
+import Container from '@/components/layout/Container';
 import VoiceRecorder from '@/components/publishing/VoiceRecorder';
 import TranscriptEditor from '@/components/publishing/TranscriptEditor';
 import AIEnhancer from '@/components/publishing/AIEnhancer';
