@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { DocumentTextIcon, SparklesIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 
 interface ArticleGeneratorProps {

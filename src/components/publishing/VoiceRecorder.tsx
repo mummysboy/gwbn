@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MicrophoneIcon, StopIcon, PlayIcon, PauseIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { MicrophoneIcon, StopIcon, PlayIcon, PauseIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 
 interface VoiceRecorderProps {
@@ -14,8 +14,8 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
   const [isPlaying, setIsPlaying] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const [speechSupported, setSpeechSupported] = useState(false);
+  const [, setIsTranscribing] = useState(false);
+  const [, setSpeechSupported] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -26,7 +26,7 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
 
   useEffect(() => {
     // Check for speech recognition support
-    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || (window as unknown as { webkitSpeechRecognition: typeof SpeechRecognition }).webkitSpeechRecognition;
     if (SpeechRecognition) {
       setSpeechSupported(true);
     }

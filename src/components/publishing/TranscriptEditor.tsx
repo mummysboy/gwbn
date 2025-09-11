@@ -184,7 +184,7 @@ export default function TranscriptEditor({
           <ul className="text-xs text-blue-800 dark:text-blue-400 space-y-1">
             <li>• Use Ctrl/Cmd + Enter to save quickly</li>
             <li>• Press Escape to cancel changes</li>
-            <li>• Use "Auto-format" to clean up spacing and punctuation</li>
+            <li>• Use &quot;Auto-format&quot; to clean up spacing and punctuation</li>
             <li>• Edit naturally - the AI enhancer will polish the final version</li>
           </ul>
         </div>

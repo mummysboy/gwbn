@@ -7,7 +7,6 @@ import {
   EyeIcon,
   ShareIcon,
   CalendarIcon,
-  ArrowRightIcon
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -37,7 +36,7 @@ export default function Home() {
         
         if (data.success && data.articles) {
           // Convert date strings back to Date objects
-          const articlesWithDates = data.articles.map((article: any) => ({
+          const articlesWithDates = data.articles.map((article: Article) => ({
             ...article,
             createdAt: new Date(article.createdAt)
           }));

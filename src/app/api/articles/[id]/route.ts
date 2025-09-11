@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Import the articles array from the main route
 // In a real application, this would be a shared database or service
-let articles: Array<{
+const articles: Array<{
   id: string;
   title: string;
   content: string;

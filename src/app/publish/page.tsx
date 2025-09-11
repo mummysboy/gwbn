@@ -9,7 +9,6 @@ import ImageUploader from '@/components/publishing/ImageUploader';
 import { 
   MicrophoneIcon, 
   DocumentTextIcon, 
-  PhotoIcon,
   ArrowRightIcon,
   CheckCircleIcon,
   SparklesIcon
@@ -21,7 +20,7 @@ export default function PublishPage() {
   const [transcript, setTranscript] = useState('');
   const [articleTitle, setArticleTitle] = useState('');
   const [articleContent, setArticleContent] = useState('');
-  const [notes, setNotes] = useState('');
+  const [notes] = useState('');
   const [error, setError] = useState('');
   const [isPublished, setIsPublished] = useState(false);
 
@@ -344,7 +343,7 @@ export default function PublishPage() {
                   {/* Debug info */}
                   {process.env.NODE_ENV === 'development' && (
                     <div className="mt-2 text-xs text-gray-500">
-                      Debug: articleTitle = "{articleTitle}"
+                      Debug: articleTitle = &quot;{articleTitle}&quot;
                     </div>
                   )}
                 </div>
@@ -371,7 +370,7 @@ export default function PublishPage() {
                   {process.env.NODE_ENV === 'development' && (
                     <div className="mt-2 text-xs text-gray-500 space-y-1">
                       <div>Debug: articleContent length: {articleContent.length}, transcript length: {transcript.length}</div>
-                      <div>articleContent preview: "{articleContent.substring(0, 100)}..."</div>
+                      <div>articleContent preview: &quot;{articleContent.substring(0, 100)}...&quot;</div>
                       <button 
                         onClick={() => {
                           setArticleTitle('Test Title');

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // In-memory storage for articles (in production, this would be a database)
-let articles: Array<{
+const articles: Array<{
   id: string;
   title: string;
   content: string;

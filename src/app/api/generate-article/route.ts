@@ -125,7 +125,7 @@ CRITICAL REQUIREMENTS:
         } else {
           // Content spans multiple lines - collect until we find the closing brace
           const contentLines = [];
-          let braceCount = 0;
+          const braceCount = 0;
           let inContent = false;
           
           for (let i = contentStartIndex; i < lines.length; i++) {

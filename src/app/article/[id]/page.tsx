@@ -11,7 +11,6 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   SpeakerWaveIcon,
-  SpeakerXMarkIcon,
   PlayIcon,
   PauseIcon,
   StopIcon
@@ -64,7 +63,7 @@ export default function ArticlePage() {
         
         if (data.success && data.articles) {
           // Convert date strings back to Date objects
-          const articlesWithDates = data.articles.map((article: any) => ({
+          const articlesWithDates = data.articles.map((article: Article) => ({
             ...article,
             createdAt: new Date(article.createdAt)
           }));
