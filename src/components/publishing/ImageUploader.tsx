@@ -30,7 +30,10 @@ export default function ImageUploader({ images, onImagesChange }: ImageUploaderP
   };
 
   const removeImage = (index: number) => {
+    console.log('ImageUploader: removeImage called, index:', index);
+    console.log('ImageUploader: current images:', images);
     const newImages = images.filter((_, i) => i !== index);
+    console.log('ImageUploader: new images after removal:', newImages);
     onImagesChange(newImages);
   };
 
@@ -93,6 +96,7 @@ export default function ImageUploader({ images, onImagesChange }: ImageUploaderP
         const result = await response.json();
 
         if (result.success && result.url) {
+          console.log('ImageUploader: Upload successful, adding URL:', result.url);
           newImages.push(result.url);
         } else {
           console.error('Upload failed for file:', file.name, result.error);
@@ -108,7 +112,12 @@ export default function ImageUploader({ images, onImagesChange }: ImageUploaderP
       }
 
       if (newImages.length > 0) {
-        onImagesChange([...images, ...newImages]);
+        console.log('ImageUploader: Adding new images to existing ones');
+        console.log('ImageUploader: Existing images:', images);
+        console.log('ImageUploader: New images:', newImages);
+        const combinedImages = [...images, ...newImages];
+        console.log('ImageUploader: Combined images:', combinedImages);
+        onImagesChange(combinedImages);
       }
       
       setIsUploading(false);

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { S3Service } from '@/lib/s3-service';
-import { LocalStorageService } from '@/lib/local-storage-service';
+import { S3Service, UploadResult } from '@/lib/s3-service';
+import { LocalStorageService, LocalUploadResult } from '@/lib/local-storage-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Try S3 first, fallback to local storage
-    let result;
+    let result: UploadResult | LocalUploadResult;
     
     if (S3Service.isConfigured()) {
       console.log('Upload API: Attempting S3 upload');
@@ -43,10 +43,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (result.success) {
+      const key = 'key' in result ? result.key : ('filename' in result ? result.filename : undefined);
       return NextResponse.json({
         success: true,
         url: result.url,
-        key: 'key' in result ? result.key : ('filename' in result ? result.filename : undefined)
+        key
       });
     } else {
       return NextResponse.json(

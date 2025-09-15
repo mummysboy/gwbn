@@ -38,6 +38,7 @@ export default function PublishPage() {
   };
 
   const handleImagesChange = (newImages: string[]) => {
+    console.log('PublishPage: handleImagesChange called with:', newImages);
     setImages(newImages);
   };
 
@@ -84,6 +85,12 @@ export default function PublishPage() {
       setIsPublished(true);
       setError('');
 
+      console.log('=== PUBLISHING ARTICLE ===');
+      console.log('Title:', articleTitle);
+      console.log('Content length:', articleContent.length);
+      console.log('Images:', images);
+      console.log('Images count:', images.length);
+
       const response = await fetch('/api/articles', {
         method: 'POST',
         headers: {
@@ -98,7 +105,9 @@ export default function PublishPage() {
         }),
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (data.success) {
         // Success - reset form after delay
