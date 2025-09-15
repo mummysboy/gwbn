@@ -1,6 +1,248 @@
 import { NextRequest, NextResponse } from 'next/server';
+import OpenAI from 'openai';
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+
+// Cache for the OpenAI API key to avoid repeated calls to Secrets Manager
+let cachedApiKey: string | null = null;
+let lastFetchTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+async function getOpenAIApiKey(): Promise<string> {
+  // Return cached key if still valid
+  if (cachedApiKey && Date.now() - lastFetchTime < CACHE_DURATION) {
+    return cachedApiKey;
+  }
+
+  try {
+    console.log('Fetching OpenAI API key from AWS Secrets Manager');
+    
+    const secretsClient = new SecretsManagerClient({
+      region: 'us-west-1', // Default region
+    });
+
+    const command = new GetSecretValueCommand({
+      SecretId: 'gwbn-openai-api-key', // Secret name in AWS Secrets Manager
+    });
+
+    const response = await secretsClient.send(command);
+    
+    if (response.SecretString) {
+      const secretData = JSON.parse(response.SecretString);
+      cachedApiKey = secretData.apiKey;
+      lastFetchTime = Date.now();
+      
+      console.log('Successfully retrieved OpenAI API key from Secrets Manager');
+      return cachedApiKey!;
+    } else {
+      throw new Error('No secret string found in Secrets Manager response');
+    }
+  } catch (error) {
+    console.error('Failed to retrieve OpenAI API key from Secrets Manager:', error);
+    
+    // Fallback: try to get from environment variable (for local development)
+    if (process.env.OPENAI_API_KEY) {
+      console.log('Using OpenAI API key from environment variable (fallback)');
+      cachedApiKey = process.env.OPENAI_API_KEY;
+      lastFetchTime = Date.now();
+      return cachedApiKey;
+    }
+    
+    throw new Error('OpenAI API key not available in Secrets Manager or environment variables');
+  }
+}
 
 export async function POST(request: NextRequest) {
+  try {
+    // Get OpenAI API key from AWS Secrets Manager (using IAM roles)
+    let apiKey: string;
+    
+    try {
+      apiKey = await getOpenAIApiKey();
+    } catch (error) {
+      console.warn('OpenAI API key not available, using local AI processing');
+      return await generateArticleLocally(request);
+    }
+
+    // Initialize OpenAI client
+    const openai = new OpenAI({
+      apiKey: apiKey,
+    });
+
+    const { transcript, notes } = await request.json();
+    
+    if (!transcript || !transcript.trim()) {
+      return NextResponse.json(
+        { error: 'Transcript is required' },
+        { status: 400 }
+      );
+    }
+
+    // Create a comprehensive prompt for generating a newspaper article
+    const prompt = `You are a professional journalist writing for a local business newspaper. Based on the following interview transcript and any additional notes, create a compelling newspaper article that follows journalistic standards.
+
+INTERVIEW TRANSCRIPT:
+${transcript}
+
+ADDITIONAL NOTES:
+${notes || 'No additional notes provided.'}
+
+Please generate:
+1. A compelling headline (title) that captures the main story and is engaging for readers
+2. A well-structured newspaper article that includes:
+   - A strong lead paragraph that hooks the reader and summarizes the key points
+   - Supporting paragraphs with quotes, details, and context from the interview
+   - Proper journalistic structure with clear transitions between paragraphs
+   - Professional tone suitable for a business publication
+   - Clear attribution and context
+   - A strong conclusion that ties everything together
+
+The article should be informative, engaging, and suitable for publication in a local business newspaper. Focus on the key business insights, community impact, and newsworthy elements from the interview. Use proper journalistic formatting with clear paragraph breaks and engaging language.
+
+IMPORTANT: Format your response as valid JSON with the following exact structure:
+{
+  "title": "Your compelling headline here",
+  "content": "Your full article content here with proper paragraph breaks and journalistic structure"
+}
+
+CRITICAL REQUIREMENTS:
+- Use double quotes around all strings
+- Escape ALL quotes within the content with backslashes (\" instead of ")
+- Escape ALL newlines within the content with \\n
+- Ensure the JSON is valid and parseable
+- Do not include any text before or after the JSON object
+- The content field must be a single string with escaped quotes and newlines`;
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a professional journalist with expertise in business reporting and local news. You write clear, engaging articles that inform and engage readers while maintaining journalistic integrity.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    });
+
+    const response = completion.choices[0]?.message?.content;
+    
+    if (!response) {
+      throw new Error('No response from OpenAI');
+    }
+
+    // Parse the JSON response
+    let articleData;
+    try {
+      // Clean up the response to ensure it's valid JSON
+      const cleanedResponse = response.trim();
+      console.log('Raw OpenAI response:', cleanedResponse);
+      
+      articleData = JSON.parse(cleanedResponse);
+      console.log('Parsed article data:', articleData);
+    } catch (parseError) {
+      console.error('JSON parsing error:', parseError);
+      console.log('Failed to parse response:', response);
+      
+      // If JSON parsing fails, try to extract title and content manually
+      const lines = response.split('\n').filter(line => line.trim());
+      let title = 'Local Business Feature';
+      let content = '';
+      
+      // Look for title in various formats
+      const titleLine = lines.find(line => 
+        line.toLowerCase().includes('"title"') || 
+        line.toLowerCase().includes('title:') ||
+        line.toLowerCase().includes('headline')
+      );
+      
+      if (titleLine) {
+        // Extract title from JSON-like format
+        const titleMatch = titleLine.match(/"title"\s*:\s*"([^"]+)"/i) || 
+                          titleLine.match(/title:\s*"([^"]+)"/i) ||
+                          titleLine.match(/title:\s*(.+)/i);
+        if (titleMatch) {
+          title = titleMatch[1].replace(/^["']|["']$/g, '').trim();
+        }
+      }
+      
+      // Extract content - look for content field
+      const contentStartIndex = lines.findIndex(line => 
+        line.toLowerCase().includes('"content"') || 
+        line.toLowerCase().includes('content:')
+      );
+      
+      if (contentStartIndex !== -1) {
+        // Find the content value - it might be on the same line or continue to the end
+        const contentLine = lines[contentStartIndex];
+        const contentMatch = contentLine.match(/"content"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/i) ||
+                           contentLine.match(/content:\s*"([^"]*(?:\\.[^"]*)*)"/i);
+        
+        if (contentMatch) {
+          content = contentMatch[1].replace(/\\"/g, '"').replace(/\\n/g, '\n').trim();
+        } else {
+          // Content spans multiple lines - collect until we find the closing brace
+          const contentLines = [];
+          let inContent = false;
+          
+          for (let i = contentStartIndex; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.includes('"content"') || line.includes('content:')) {
+              inContent = true;
+              // Extract content from this line
+              const afterColon = line.split(/content:\s*"/i)[1] || line.split(/"content"\s*:\s*"/i)[1];
+              if (afterColon) {
+                contentLines.push(afterColon);
+              }
+              continue;
+            }
+            
+            if (inContent) {
+              if (line.includes('}')) {
+                // Remove the closing brace and any trailing content
+                const beforeBrace = line.split('}')[0];
+                if (beforeBrace.trim()) {
+                  contentLines.push(beforeBrace);
+                }
+                break;
+              }
+              contentLines.push(line);
+            }
+          }
+          
+          content = contentLines.join('\n').replace(/^["']|["']$/g, '').trim();
+        }
+      } else {
+        // Fallback: use everything except title line as content
+        content = lines.filter(line => !line.toLowerCase().includes('title')).join('\n').trim();
+      }
+      
+      articleData = {
+        title: title,
+        content: content || 'Article content could not be extracted from the response.'
+      };
+      
+      console.log('Fallback article data:', articleData);
+    }
+
+    return NextResponse.json({ 
+      success: true,
+      title: articleData.title,
+      content: articleData.content
+    });
+
+  } catch (error) {
+    console.error('OpenAI article generation error:', error);
+    
+    // Fallback to local generation if OpenAI fails
+    return await generateArticleLocally(request);
+  }
+}
+
+async function generateArticleLocally(request: NextRequest) {
   try {
     const { transcript, notes } = await request.json();
     
@@ -15,13 +257,14 @@ export async function POST(request: NextRequest) {
     const articleData = generateArticleFromTranscript(transcript, notes || '');
 
     return NextResponse.json({ 
-      success: true,
+      success: false, // Mark as false to indicate fallback
       title: articleData.title,
-      content: articleData.content
+      content: articleData.content,
+      fallback: true
     });
 
   } catch (error) {
-    console.error('Article generation error:', error);
+    console.error('Local article generation error:', error);
     
     // Return a fallback article if generation fails
     const fallbackArticle = {
