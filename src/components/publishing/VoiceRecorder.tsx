@@ -165,14 +165,81 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
       
     } catch (error) {
       console.error('Transcription API error:', error);
-      onError('Failed to transcribe audio. Please try again.');
       
-      // Fallback to mock transcript
-      const mockTranscript = generateMockTranscript();
-      onTranscript(mockTranscript);
+      // Try client-side speech recognition as fallback
+      console.log('Attempting client-side speech recognition fallback');
+      try {
+        await startClientSideTranscription();
+      } catch (clientError) {
+        console.error('Client-side transcription also failed:', clientError);
+        onError('Failed to transcribe audio. Please try again.');
+        
+        // Final fallback to mock transcript
+        const mockTranscript = generateMockTranscript();
+        onTranscript(mockTranscript);
+      }
     } finally {
       setIsTranscribing(false);
     }
+  };
+
+  const startClientSideTranscription = async () => {
+    return new Promise<void>((resolve, reject) => {
+      // Check if SpeechRecognition is supported
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      
+      if (!SpeechRecognition) {
+        reject(new Error('Speech recognition not supported in this browser'));
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      let finalTranscript = '';
+
+      recognition.onresult = (event: any) => {
+        let interimTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        
+        // Update with interim results
+        if (interimTranscript) {
+          onTranscript(finalTranscript + interimTranscript);
+        }
+      };
+
+      recognition.onend = () => {
+        if (finalTranscript) {
+          console.log('Client-side transcription completed:', finalTranscript);
+          onTranscript(finalTranscript);
+          resolve();
+        } else {
+          reject(new Error('No speech detected'));
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        reject(new Error(`Speech recognition failed: ${event.error}`));
+      };
+
+      recognition.start();
+      
+      // Auto-stop after 30 seconds
+      setTimeout(() => {
+        recognition.stop();
+      }, 30000);
+    });
   };
 
   const formatTime = (seconds: number) => {
