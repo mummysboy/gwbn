@@ -9,7 +9,7 @@ export interface AWSConfig {
 }
 
 export const awsConfig: AWSConfig = {
-  region: process.env.REGION || process.env.AWS_REGION || 'us-east-1',
+  region: process.env.REGION || process.env.AWS_REGION || 'us-west-1',
   accessKeyId: process.env.ACCESS_KEY_ID,
   secretAccessKey: process.env.SECRET_ACCESS_KEY,
 };
@@ -31,7 +31,7 @@ export const cognitoConfig = {
 
 export const s3Config = {
   bucketName: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
-  region: process.env.NEXT_PUBLIC_S3_REGION || 'us-east-1',
+  region: process.env.NEXT_PUBLIC_S3_REGION || 'us-west-1',
 };
 
 export const apiGatewayConfig = {

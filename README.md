@@ -52,7 +52,7 @@ cp env.example .env.local
 
 Edit `.env.local` with your configuration:
 ```env
-AWS_REGION=us-east-1
+AWS_REGION=us-west-1
 AWS_ACCESS_KEY_ID=your_access_key_here
 AWS_SECRET_ACCESS_KEY=your_secret_key_here
 NEXT_PUBLIC_APP_NAME=Golden West Business News
