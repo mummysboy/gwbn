@@ -94,12 +94,11 @@ function ArticleContentWithPhotos({ content, images, title }: ArticleContentWith
           return (
             <div key={index} className="w-full mb-6">
               <div className={`${borderClass} max-w-md mx-auto`}>
-                <Image
+                <img
                   src={item.src}
                   alt={item.alt}
-                  width={400}
-                  height={isThumbnail ? 500 : 300}
                   className="w-full h-auto"
+                  style={{ maxWidth: '400px', height: isThumbnail ? '500px' : '300px', objectFit: 'cover' }}
                 />
               </div>
             </div>
@@ -299,20 +298,27 @@ export default function ArticlePage() {
       <header className="border-b-2 border-black">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="headline-serif text-4xl md:text-5xl font-bold text-black mb-2">
-              GWBN
+            <Link
+              href="/"
+              className="headline-serif text-4xl md:text-5xl font-bold text-black mb-2"
+            >
+              <Image
+                src="/Golden West Business News.png"
+                alt="Golden West Business News"
+                width={600}
+                height={240}
+                className="h-32 w-auto -mb-10 -mt-8 mx-auto"
+                priority
+              />
             </Link>
             <div className="text-right">
               <p className="caption-text text-sm">
-                {new Date().toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
                 })}
-              </p>
-              <p className="caption-text text-xs">
-                Vol. 1, No. 1
               </p>
             </div>
           </div>
@@ -322,8 +328,8 @@ export default function ArticlePage() {
       {/* Navigation */}
       <div className="border-b border-gray-200">
         <div className="container mx-auto px-4 py-3">
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors"
           >
             <ArrowLeftIcon className="w-4 h-4" />
@@ -342,13 +348,15 @@ export default function ArticlePage() {
                 {article.category}
               </span>
               <span className="caption-text">•</span>
-              <span className="caption-text">{getTimeAgo(article.createdAt)}</span>
+              <span className="caption-text">
+                {getTimeAgo(article.createdAt)}
+              </span>
             </div>
-            
+
             <h1 className="headline-serif text-4xl md:text-5xl lg:text-6xl font-bold text-black mb-6 leading-tight">
               {article.title}
             </h1>
-            
+
             <div className="flex items-center gap-6 mb-6">
               <div className="flex items-center gap-2">
                 <UserIcon className="w-4 h-4 text-gray-600" />
@@ -356,11 +364,15 @@ export default function ArticlePage() {
               </div>
               <div className="flex items-center gap-2">
                 <ClockIcon className="w-4 h-4 text-gray-600" />
-                <span className="caption-text">{article.readTime} min read</span>
+                <span className="caption-text">
+                  {article.readTime} min read
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <CalendarIcon className="w-4 h-4 text-gray-600" />
-                <span className="caption-text">{article.createdAt.toLocaleDateString()}</span>
+                <span className="caption-text">
+                  {article.createdAt.toLocaleDateString()}
+                </span>
               </div>
             </div>
           </div>
@@ -368,9 +380,9 @@ export default function ArticlePage() {
           {/* Article Body with Inline Photos - Newspaper Style */}
           <div className="prose prose-lg max-w-none">
             {article.images && article.images.length > 0 ? (
-              <ArticleContentWithPhotos 
-                content={article.content} 
-                images={article.images} 
+              <ArticleContentWithPhotos
+                content={article.content}
+                images={article.images}
                 title={article.title}
                 author={article.author}
               />
@@ -397,7 +409,7 @@ export default function ArticlePage() {
                 </button>
                 {speechSupported && (
                   <div className="flex items-center gap-2">
-                    <button 
+                    <button
                       onClick={handleVoiceRead}
                       className="flex items-center gap-2 text-black hover:text-gray-600 transition-colors"
                     >
@@ -411,11 +423,11 @@ export default function ArticlePage() {
                         <SpeakerWaveIcon className="w-4 h-4" />
                       )}
                       <span className="caption-text">
-                        {isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Listen'}
+                        {isPlaying ? (isPaused ? "Resume" : "Pause") : "Listen"}
                       </span>
                     </button>
                     {isPlaying && (
-                      <button 
+                      <button
                         onClick={stopSpeech}
                         className="flex items-center gap-2 text-red-600 hover:text-red-800 transition-colors"
                       >
@@ -426,7 +438,7 @@ export default function ArticlePage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="text-right">
                 <p className="caption-text text-xs">
                   Published by Golden West Business News
@@ -444,60 +456,128 @@ export default function ArticlePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Previous Article */}
             <button
-              onClick={() => navigateToArticle('prev')}
+              onClick={() => navigateToArticle("prev")}
               className="group flex items-start gap-4 p-4 border border-gray-300 hover:border-black transition-colors text-left"
             >
               <div className="flex-shrink-0">
                 <div className="w-20 h-16 bg-gray-100 rounded overflow-hidden">
-                  <Image
-                    src={allArticles[currentIndex > 0 ? currentIndex - 1 : allArticles.length - 1]?.images[0] || ''}
-                    alt={allArticles[currentIndex > 0 ? currentIndex - 1 : allArticles.length - 1]?.title || ''}
-                    width={80}
-                    height={64}
+                  <img
+                    src={
+                      allArticles[
+                        currentIndex > 0
+                          ? currentIndex - 1
+                          : allArticles.length - 1
+                      ]?.images[0] || "/placeholder-image.svg"
+                    }
+                    alt={
+                      allArticles[
+                        currentIndex > 0
+                          ? currentIndex - 1
+                          : allArticles.length - 1
+                      ]?.title || ""
+                    }
                     className="w-full h-full object-cover"
+                    style={{ width: '80px', height: '64px' }}
                   />
                 </div>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
                   <ArrowLeftIcon className="w-4 h-4 text-gray-500" />
-                  <p className="caption-text text-xs text-gray-500">Previous Article</p>
+                  <p className="caption-text text-xs text-gray-500">
+                    Previous Article
+                  </p>
                 </div>
                 <h3 className="text-sm font-semibold text-gray-900 group-hover:text-black transition-colors leading-tight">
-                  {allArticles[currentIndex > 0 ? currentIndex - 1 : allArticles.length - 1]?.title}
+                  {
+                    allArticles[
+                      currentIndex > 0
+                        ? currentIndex - 1
+                        : allArticles.length - 1
+                    ]?.title
+                  }
                 </h3>
                 <p className="text-xs text-gray-600 mt-1">
-                  {allArticles[currentIndex > 0 ? currentIndex - 1 : allArticles.length - 1]?.author} • {allArticles[currentIndex > 0 ? currentIndex - 1 : allArticles.length - 1]?.readTime} min read
+                  {
+                    allArticles[
+                      currentIndex > 0
+                        ? currentIndex - 1
+                        : allArticles.length - 1
+                    ]?.author
+                  }{" "}
+                  •{" "}
+                  {
+                    allArticles[
+                      currentIndex > 0
+                        ? currentIndex - 1
+                        : allArticles.length - 1
+                    ]?.readTime
+                  }{" "}
+                  min read
                 </p>
               </div>
             </button>
 
             {/* Next Article */}
             <button
-              onClick={() => navigateToArticle('next')}
+              onClick={() => navigateToArticle("next")}
               className="group flex items-start gap-4 p-4 border border-gray-300 hover:border-black transition-colors text-left"
             >
               <div className="flex-shrink-0">
                 <div className="w-20 h-16 bg-gray-100 rounded overflow-hidden">
-                  <Image
-                    src={allArticles[currentIndex < allArticles.length - 1 ? currentIndex + 1 : 0]?.images[0] || ''}
-                    alt={allArticles[currentIndex < allArticles.length - 1 ? currentIndex + 1 : 0]?.title || ''}
-                    width={80}
-                    height={64}
+                  <img
+                    src={
+                      allArticles[
+                        currentIndex < allArticles.length - 1
+                          ? currentIndex + 1
+                          : 0
+                      ]?.images[0] || "/placeholder-image.svg"
+                    }
+                    alt={
+                      allArticles[
+                        currentIndex < allArticles.length - 1
+                          ? currentIndex + 1
+                          : 0
+                      ]?.title || ""
+                    }
                     className="w-full h-full object-cover"
+                    style={{ width: '80px', height: '64px' }}
                   />
                 </div>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
-                  <p className="caption-text text-xs text-gray-500">Next Article</p>
+                  <p className="caption-text text-xs text-gray-500">
+                    Next Article
+                  </p>
                   <ArrowRightIcon className="w-4 h-4 text-gray-500" />
                 </div>
                 <h3 className="text-sm font-semibold text-gray-900 group-hover:text-black transition-colors leading-tight">
-                  {allArticles[currentIndex < allArticles.length - 1 ? currentIndex + 1 : 0]?.title}
+                  {
+                    allArticles[
+                      currentIndex < allArticles.length - 1
+                        ? currentIndex + 1
+                        : 0
+                    ]?.title
+                  }
                 </h3>
                 <p className="text-xs text-gray-600 mt-1">
-                  {allArticles[currentIndex < allArticles.length - 1 ? currentIndex + 1 : 0]?.author} • {allArticles[currentIndex < allArticles.length - 1 ? currentIndex + 1 : 0]?.readTime} min read
+                  {
+                    allArticles[
+                      currentIndex < allArticles.length - 1
+                        ? currentIndex + 1
+                        : 0
+                    ]?.author
+                  }{" "}
+                  •{" "}
+                  {
+                    allArticles[
+                      currentIndex < allArticles.length - 1
+                        ? currentIndex + 1
+                        : 0
+                    ]?.readTime
+                  }{" "}
+                  min read
                 </p>
               </div>
             </button>
@@ -510,7 +590,8 @@ export default function ArticlePage() {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <p className="caption-text text-xs">
-              © 2024 Golden West Business News. All rights reserved. Built with Next.js, TypeScript, and AI.
+              © 2024 Golden West Business News. All rights reserved. Built with
+              Next.js, TypeScript, and AI.
             </p>
           </div>
         </div>

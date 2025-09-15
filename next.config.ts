@@ -10,6 +10,18 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    // Allow local images from uploads directory
+    domains: ['localhost', '127.0.0.1'],
+    unoptimized: true, // Disable optimization for local images to avoid issues
+  },
+  // Ensure static files are served correctly
+  async rewrites() {
+    return [
+      {
+        source: '/uploads/:path*',
+        destination: '/uploads/:path*',
+      },
+    ];
   },
 };
 

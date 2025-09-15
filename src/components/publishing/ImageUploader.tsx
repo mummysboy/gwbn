@@ -76,16 +76,41 @@ export default function ImageUploader({ images, onImagesChange }: ImageUploaderP
           continue;
         }
 
-        // Simulate upload progress
+        // Update progress
         const progress = ((i + 1) / files.length) * 100;
         setUploadProgress(progress);
 
-        // Create object URL for preview
-        const imageUrl = URL.createObjectURL(file);
-        newImages.push(imageUrl);
+        // Upload to S3
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'articles');
+
+        const response = await fetch('/api/upload-image', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (result.success && result.url) {
+          newImages.push(result.url);
+        } else {
+          console.error('Upload failed for file:', file.name, result.error);
+          // If S3 upload fails, fall back to object URL for now
+          if (result.error && result.error.includes('S3')) {
+            console.warn('S3 not configured, using temporary object URL for:', file.name);
+            const fallbackUrl = URL.createObjectURL(file);
+            newImages.push(fallbackUrl);
+          } else {
+            alert(`Failed to upload ${file.name}: ${result.error || 'Unknown error'}`);
+          }
+        }
       }
 
-      onImagesChange([...images, ...newImages]);
+      if (newImages.length > 0) {
+        onImagesChange([...images, ...newImages]);
+      }
+      
       setIsUploading(false);
       setUploadProgress(0);
 
@@ -167,12 +192,11 @@ export default function ImageUploader({ images, onImagesChange }: ImageUploaderP
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {images.map((image, index) => (
               <div key={index} className="relative group">
-                <Image
+                <img
                   src={image}
                   alt={`Upload ${index + 1}`}
-                  width={200}
-                  height={128}
                   className="w-full h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                  style={{ width: '200px', height: '128px' }}
                 />
                 
                 {/* Remove Button */}

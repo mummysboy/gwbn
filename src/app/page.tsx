@@ -128,12 +128,11 @@ export default function Home() {
               {/* Featured image */}
               {featuredArticle.images.length > 0 && (
                 <div className="mb-4">
-                  <Image
+                  <img
                     src={featuredArticle.images[0]}
                     alt={featuredArticle.title}
-                    width={800}
-                    height={400}
                     className="w-full h-48 sm:h-64 object-cover"
+                    style={{ width: '800px', height: '400px' }}
                   />
                 </div>
               )}
@@ -193,12 +192,11 @@ export default function Home() {
                 {/* Thumbnail image */}
                 {article.images.length > 0 && (
                   <div className="flex-shrink-0">
-                    <Image
+                    <img
                       src={article.images[0]}
                       alt={article.title}
-                      width={120}
-                      height={80}
                       className="w-24 h-16 sm:w-28 sm:h-20 object-cover"
+                      style={{ width: '120px', height: '80px' }}
                     />
                   </div>
                 )}
