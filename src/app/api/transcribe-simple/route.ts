@@ -21,21 +21,29 @@ export async function POST(request: NextRequest) {
       name: audioFile.name
     });
 
-    // Use the new OpenAI utility function with Parameter Store integration
-    const transcription = await transcribeAudio(audioFile);
+    // Try to use OpenAI utility function with Parameter Store integration
+    try {
+      const transcription = await transcribeAudio(audioFile);
+      
+      console.log('OpenAI transcription completed successfully');
 
-    console.log('OpenAI transcription completed successfully');
+      return NextResponse.json({ 
+        transcript: transcription,
+        success: true,
+        service: 'openai-whisper-parameter-store',
+        audioInfo: {
+          size: audioFile.size,
+          type: audioFile.type,
+          name: audioFile.name
+        }
+      });
+    } catch (openaiError) {
+      console.warn('OpenAI transcription failed, using fallback:', openaiError);
+      // Fall through to fallback transcription
+    }
 
-    return NextResponse.json({ 
-      transcript: transcription,
-      success: true,
-      service: 'openai-whisper-parameter-store',
-      audioInfo: {
-        size: audioFile.size,
-        type: audioFile.type,
-        name: audioFile.name
-      }
-    });
+    // Use fallback transcription if OpenAI fails
+    return await getFallbackTranscription(audioFile);
 
   } catch (error) {
     console.error('Simple transcription error:', error);
