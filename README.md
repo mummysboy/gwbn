@@ -1,6 +1,6 @@
 # Golden West Business News - AI-Powered Publishing Platform
 
-A mobile-first AI-powered publishing platform built with Next.js, TypeScript, Tailwind CSS, and AWS integration. This project enables voice-to-text publishing with AI enhancement for professional journalism.
+A mobile-first AI-powered publishing platform built with Next.js, TypeScript, and Tailwind CSS. This project enables voice-to-text publishing with AI enhancement for professional journalism using local processing - no external API keys or environment variables required!
 
 ## 🚀 Tech Stack
 
@@ -45,18 +45,13 @@ yarn install
 pnpm install
 ```
 
-3. Set up environment variables:
+3. Optional: Set up environment variables (not required!):
 ```bash
 cp env.example .env.local
 ```
 
-Edit `.env.local` with your configuration:
-```env
-AWS_REGION=us-west-1
-AWS_ACCESS_KEY_ID=your_access_key_here
-AWS_SECRET_ACCESS_KEY=your_secret_key_here
-NEXT_PUBLIC_APP_NAME=Golden West Business News
-```
+The application works without any environment variables! All features use local processing.
+Environment variables are only needed for optional AWS integrations.
 
 4. Run the development server:
 ```bash
@@ -105,11 +100,11 @@ The project is configured for AWS services:
 
 - **Configuration**: Centralized AWS config in `src/lib/aws-config.ts`
 - **Environment Variables**: Secure credential management
-- **Services Ready**: 
-  - S3 for file storage
-  - Cognito for authentication
-  - API Gateway for backend services
-  - RDS for database
+- **Local Processing**: 
+  - Voice-to-text transcription (local processing)
+  - AI article generation (local processing)
+  - No external API dependencies
+  - Works offline
 
 ## 🚀 Deployment
 

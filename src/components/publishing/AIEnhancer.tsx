@@ -41,7 +41,7 @@ export default function AIEnhancer({ transcript, notes = '', onEnhanced }: AIEnh
       console.log('Result success:', result.success);
       
       if (result.success) {
-        console.log('OpenAI article generation successful:', result.title);
+        console.log('AI article generation successful:', result.title);
         console.log('Generated content:', result.content);
         console.log('Calling onEnhanced with:', { title: result.title, content: result.content });
         
@@ -61,7 +61,7 @@ export default function AIEnhancer({ transcript, notes = '', onEnhanced }: AIEnh
           console.error('Error calling onEnhanced:', error);
         }
       } else {
-        console.log('OpenAI article generation failed, using fallback:', result.title);
+        console.log('AI article generation failed, using fallback:', result.title);
         console.log('Fallback content:', result.content);
         console.log('Calling onEnhanced with fallback:', { title: result.title, content: result.content });
         
@@ -147,7 +147,7 @@ Residents can expect to receive more information about the project in the coming
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
             <div className="text-purple-800 dark:text-purple-300">
               <div className="font-medium">Generating article with AI...</div>
-              <div className="text-sm">Using OpenAI to analyze transcript and notes to create professional article</div>
+              <div className="text-sm">Using AI to analyze transcript and notes to create professional article</div>
             </div>
           </div>
         </div>
@@ -171,7 +171,7 @@ Residents can expect to receive more information about the project in the coming
           Article Features:
         </h3>
         <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-          <li>• AI-powered article generation using OpenAI GPT-4</li>
+          <li>• AI-powered article generation using local AI processing</li>
           <li>• Professional news article format and structure</li>
           <li>• Intelligent analysis of transcript and notes</li>
           <li>• Clean, journalistic writing style</li>

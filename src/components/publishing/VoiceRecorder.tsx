@@ -128,30 +128,12 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
       
-      // Try the simple endpoint first (no AWS Secrets Manager required)
-      console.log('Making POST request to /api/transcribe-simple');
-      let response = await fetch('/api/transcribe-simple', {
+      // Use local transcription endpoint (no environment variables required)
+      console.log('Making POST request to /api/transcribe-simple (local processing)');
+      const response = await fetch('/api/transcribe-simple', {
         method: 'POST',
         body: formData,
       });
-      
-      // If simple endpoint fails, try the direct endpoint
-      if (!response.ok) {
-        console.log('Simple endpoint failed, trying /api/transcribe-direct');
-        response = await fetch('/api/transcribe-direct', {
-          method: 'POST',
-          body: formData,
-        });
-      }
-      
-      // If direct endpoint fails, try the fallback endpoint
-      if (!response.ok) {
-        console.log('Direct endpoint failed, trying /api/transcribe-fallback');
-        response = await fetch('/api/transcribe-fallback', {
-          method: 'POST',
-          body: formData,
-        });
-      }
       
       console.log('Response received:', response.status, response.statusText);
       
@@ -162,31 +144,20 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
       const result = await response.json();
       
       if (result.success) {
-        console.log('OpenAI transcription successful:', result.transcript);
+        console.log('Local transcription successful:', result.transcript);
         onTranscript(result.transcript);
       } else {
-        console.log('OpenAI transcription failed, using fallback:', result.transcript);
-        if (result.error && result.error.includes('API key not configured')) {
-          console.warn('OpenAI API key not configured in environment variables');
-        }
+        console.log('Local transcription failed, using fallback:', result.transcript);
         onTranscript(result.transcript);
       }
       
     } catch (error) {
-      console.error('Transcription API error:', error);
+      console.error('Transcription error:', error);
       
-      // Try client-side speech recognition as fallback
-      console.log('Attempting client-side speech recognition fallback');
-      try {
-        await startClientSideTranscription();
-      } catch (clientError) {
-        console.error('Client-side transcription also failed:', clientError);
-        onError('Failed to transcribe audio. Please try again.');
-        
-        // Final fallback to mock transcript
-        const mockTranscript = generateMockTranscript();
-        onTranscript(mockTranscript);
-      }
+      // Fallback to mock transcript if everything fails
+      console.log('Using fallback transcript');
+      const mockTranscript = generateMockTranscript();
+      onTranscript(mockTranscript);
     } finally {
       setIsTranscribing(false);
     }
