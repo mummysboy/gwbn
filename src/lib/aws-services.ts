@@ -4,15 +4,28 @@ import { awsConfig } from './aws-config';
 
 // Check if AWS credentials are configured
 const hasAWSCredentials = awsConfig.accessKeyId && awsConfig.secretAccessKey;
+const hasIAMRole = !!(process.env.AWS_ROLE_ARN || process.env.AWS_WEB_IDENTITY_TOKEN_FILE);
 
-// Initialize DynamoDB client only if credentials are available
-const client = hasAWSCredentials ? new DynamoDBClient({
-  region: awsConfig.region,
-  credentials: {
-    accessKeyId: awsConfig.accessKeyId!,
-    secretAccessKey: awsConfig.secretAccessKey!,
-  },
-}) : null;
+// Initialize DynamoDB client
+let client: DynamoDBClient | null = null;
+
+if (hasAWSCredentials) {
+  // Use access keys
+  client = new DynamoDBClient({
+    region: awsConfig.region,
+    credentials: {
+      accessKeyId: awsConfig.accessKeyId!,
+      secretAccessKey: awsConfig.secretAccessKey!,
+    },
+  });
+} else if (hasIAMRole) {
+  // Use IAM role (for AWS services like Lambda, EC2, etc.)
+  client = new DynamoDBClient({
+    region: awsConfig.region,
+  });
+} else {
+  console.warn('No AWS credentials found. DynamoDB operations will fail.');
+}
 
 const docClient = client ? DynamoDBDocumentClient.from(client) : null;
 
@@ -65,7 +78,7 @@ export interface Analytics {
 export class ArticleService {
   static async createArticle(article: Omit<Article, 'id' | 'createdAt' | 'updatedAt'>): Promise<Article> {
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
     const now = new Date().toISOString();
@@ -88,7 +101,7 @@ export class ArticleService {
 
   static async getArticle(id: string): Promise<Article | null> {
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
     const result = await docClient.send(new GetCommand({
@@ -101,7 +114,7 @@ export class ArticleService {
 
   static async getArticles(status?: 'draft' | 'published'): Promise<Article[]> {
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
     const params: {
@@ -154,7 +167,7 @@ export class ArticleService {
     expressionAttributeValues[':updatedAt'] = new Date().toISOString();
 
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
     const result = await docClient.send(new UpdateCommand({
@@ -171,7 +184,7 @@ export class ArticleService {
 
   static async deleteArticle(id: string): Promise<boolean> {
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
     await docClient.send(new DeleteCommand({
@@ -184,7 +197,7 @@ export class ArticleService {
 
   static async incrementViews(id: string): Promise<void> {
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
     await docClient.send(new UpdateCommand({
@@ -212,7 +225,7 @@ export class UserService {
     };
 
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
     await docClient.send(new PutCommand({
@@ -225,7 +238,7 @@ export class UserService {
 
   static async getUsers(): Promise<User[]> {
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
     const result = await docClient.send(new ScanCommand({
@@ -239,7 +252,7 @@ export class UserService {
 
   static async getUser(id: string): Promise<User | null> {
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
     const result = await docClient.send(new GetCommand({
@@ -268,7 +281,7 @@ export class UserService {
     }
 
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
     const result = await docClient.send(new UpdateCommand({
@@ -285,7 +298,7 @@ export class UserService {
 
   static async deleteUser(id: string): Promise<boolean> {
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
     await docClient.send(new DeleteCommand({
@@ -303,7 +316,7 @@ export class AnalyticsService {
     const today = new Date().toISOString().split('T')[0];
     
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
     const result = await docClient.send(new GetCommand({
@@ -337,7 +350,7 @@ export class AnalyticsService {
     };
 
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
     await docClient.send(new PutCommand({
