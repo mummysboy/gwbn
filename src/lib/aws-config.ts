@@ -26,6 +26,7 @@ export const awsConfig: AWSConfig = (() => {
   // Check if we're on the server side
   if (typeof window === 'undefined') {
     // Server-side: use server configuration
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { serverAWSConfig } = require('./server-aws-config');
     return serverAWSConfig;
   } else {
@@ -40,6 +41,7 @@ export const awsConfig: AWSConfig = (() => {
 // Legacy databaseConfig - server-only
 export const databaseConfig = (() => {
   if (typeof window === 'undefined') {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { serverDatabaseConfig } = require('./server-aws-config');
     return serverDatabaseConfig;
   } else {
@@ -52,6 +54,7 @@ export const databaseConfig = (() => {
 export function validateAWSConfig(): boolean {
   if (typeof window === 'undefined') {
     // Server-side: use server validation
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { validateServerAWSConfig } = require('./server-aws-config');
     return validateServerAWSConfig();
   } else {
@@ -64,6 +67,7 @@ export function validateAWSConfig(): boolean {
 export function getAWSConfigStatus() {
   if (typeof window === 'undefined') {
     // Server-side: use server status
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { getServerAWSConfigStatus } = require('./server-aws-config');
     return getServerAWSConfigStatus();
   } else {
