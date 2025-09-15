@@ -144,6 +144,15 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
         });
       }
       
+      // If direct endpoint fails, try the fallback endpoint
+      if (!response.ok) {
+        console.log('Direct endpoint failed, trying /api/transcribe-fallback');
+        response = await fetch('/api/transcribe-fallback', {
+          method: 'POST',
+          body: formData,
+        });
+      }
+      
       console.log('Response received:', response.status, response.statusText);
       
       if (!response.ok) {

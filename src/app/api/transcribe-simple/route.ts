@@ -11,7 +11,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.',
-          success: false
+          success: false,
+          debug: {
+            hasOpenAIKey: !!process.env.OPENAI_API_KEY,
+            nodeEnv: process.env.NODE_ENV,
+            awsRegion: process.env.AWS_REGION
+          }
         },
         { status: 500 }
       );
