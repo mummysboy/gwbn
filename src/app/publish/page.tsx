@@ -58,16 +58,30 @@ export default function PublishPage() {
     console.log('DEBUG - Content looks like title?', content?.length < 100 && content?.includes(':'));
     
     console.log('About to set state...');
-    setArticleTitle(title);
-    setArticleContent(content);
+    
+    // Use functional updates to ensure state is set correctly
+    setArticleTitle(() => {
+      console.log('Setting articleTitle to:', title);
+      return title;
+    });
+    
+    setArticleContent(() => {
+      console.log('Setting articleContent to:', content);
+      return content;
+    });
+    
     console.log('State set successfully');
     
-    console.log('State should be updated now');
+    // Use setTimeout to ensure state updates have been processed
+    setTimeout(() => {
+      console.log('State should be updated now');
+      
+      if (content.trim()) {
+        console.log('Moving to publish step');
+        setCurrentStep('publish');
+      }
+    }, 100);
     
-    if (content.trim()) {
-      console.log('Moving to publish step');
-      setCurrentStep('publish');
-    }
     console.log('=== HANDLE ENHANCED COMPLETE ===');
   };
 
@@ -357,8 +371,11 @@ export default function PublishPage() {
                   />
                   {/* Debug info */}
                   {clientEnvironment.isDevelopment && (
-                    <div className="mt-2 text-xs text-gray-500">
-                      Debug: articleTitle = &quot;{articleTitle}&quot;
+                    <div className="mt-2 text-xs text-gray-500 space-y-1">
+                      <div>Debug: articleTitle = &quot;{articleTitle}&quot;</div>
+                      <div>Debug: articleTitle length: {articleTitle.length}</div>
+                      <div>Debug: articleContent length: {articleContent.length}</div>
+                      <div>Debug: currentStep: {currentStep}</div>
                     </div>
                   )}
                 </div>

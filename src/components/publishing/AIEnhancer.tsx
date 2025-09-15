@@ -20,8 +20,8 @@ export default function AIEnhancer({ transcript, notes = '', onEnhanced }: AIEnh
     setIsEnhancing(true);
     
     try {
-      // Call OpenAI API to generate article
-      const response = await fetch('/api/generate-article', {
+      // Call the working API to generate article
+      const response = await fetch('/api/generate-article-working', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ export default function AIEnhancer({ transcript, notes = '', onEnhanced }: AIEnh
       console.log('Result success:', result.success);
       
       if (result.success) {
-        console.log('AI article generation successful:', result.title);
+        console.log('Bedrock article generation successful:', result.title);
         console.log('Generated content:', result.content);
         console.log('Calling onEnhanced with:', { title: result.title, content: result.content });
         
