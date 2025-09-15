@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Service, UploadResult } from '@/lib/s3-service';
+import { LocalStorageService, LocalUploadResult } from '@/lib/local-storage-service';
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const folder = formData.get('folder') as string || 'articles';
+    const folder = formData.get('folder') as string || 'articles'; // Default folder
 
     if (!file) {
       return NextResponse.json(
@@ -30,98 +31,56 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Upload API: Processing image upload to S3 (using IAM roles)');
-
-    // Initialize S3 client with IAM role (no environment variables needed)
-    const s3Client = new S3Client({
-      region: 'us-west-1', // Default region
-    });
-
-    // Generate unique filename
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 15);
-    const fileExtension = file.name.split('.').pop() || 'jpg';
-    const fileName = `${timestamp}_${randomString}.${fileExtension}`;
-    
-    // S3 bucket name (you can hardcode this or use a default)
-    const bucketName = 'gwbn-storage';
-    const key = `${folder}/${fileName}`;
-
-    // Convert file to buffer
-    const buffer = await file.arrayBuffer();
-
-    // Upload to S3
-    const command = new PutObjectCommand({
-      Bucket: bucketName,
-      Key: key,
-      Body: Buffer.from(buffer),
-      ContentType: file.type,
-      ACL: 'public-read', // Make the image publicly accessible
-    });
-
-    await s3Client.send(command);
-
-    // Generate the public URL
-    const url = `https://${bucketName}.s3.us-west-1.amazonaws.com/${key}`;
-
-    console.log('Upload API: Successfully uploaded to S3:', { fileName, url });
-
-    return NextResponse.json({
-      success: true,
-      url: url,
-      key: key,
-      filename: fileName,
-      storageType: 's3'
-    });
-
-  } catch (error) {
-    console.error('S3 upload error:', error);
-    
-    // If S3 fails, fall back to base64
+    // Attempt S3 upload first (using IAM roles, no explicit env vars needed)
+    let result: UploadResult | LocalUploadResult;
     try {
-      console.log('S3 upload failed, falling back to base64 storage');
-      
-      const formData = await request.formData();
-      const file = formData.get('file') as File;
-      
-      if (!file) {
-        return NextResponse.json(
-          { error: 'No file provided' },
-          { status: 400 }
-        );
+      console.log('Upload API: Attempting S3 upload with IAM roles');
+      result = await S3Service.uploadImage(file, folder);
+
+      if (!result.success) {
+        console.warn('S3 upload failed, falling back to local storage:', result.error);
+        result = await LocalStorageService.uploadImage(file, folder);
       }
+    } catch (s3Error) {
+      console.error('S3 upload threw an error, falling back to local storage:', s3Error);
+      result = await LocalStorageService.uploadImage(file, folder);
+    }
 
-      // Convert file to base64 for fallback storage
-      const buffer = await file.arrayBuffer();
-      const base64 = Buffer.from(buffer).toString('base64');
-      
-      // Generate unique filename
-      const timestamp = Date.now();
-      const randomString = Math.random().toString(36).substring(2, 15);
-      const fileExtension = file.name.split('.').pop() || 'jpg';
-      const fileName = `${timestamp}_${randomString}.${fileExtension}`;
-      
-      // Create a data URL for the image
-      const dataUrl = `data:${file.type};base64,${base64}`;
-
-      console.log('Upload API: Fallback to base64 successful:', { fileName });
-
+    if (result.success) {
+      const key = 'key' in result ? result.key : ('filename' in result ? result.filename : undefined);
       return NextResponse.json({
         success: true,
-        url: dataUrl,
-        filename: fileName,
-        storageType: 'base64-fallback'
+        url: result.url,
+        key,
+        storageType: 'key' in result ? 's3' : 'local'
       });
-
-    } catch (fallbackError) {
-      console.error('Fallback upload error:', fallbackError);
+    } else {
       return NextResponse.json(
-        { 
-          error: 'Upload failed',
-          details: error instanceof Error ? error.message : 'Unknown error'
+        {
+          error: result.error || 'Upload failed',
+          debug: {
+            s3Configured: S3Service.isConfigured(),
+            s3ConfigStatus: S3Service.getConfigStatus(),
+            environment: process.env.NODE_ENV,
+            platform: process.env.VERCEL ? 'Vercel' : process.env.AMPLIFY_APP_ID ? 'Amplify' : 'Unknown'
+          }
         },
         { status: 500 }
       );
     }
+
+  } catch (error) {
+    console.error('Image upload error:', error);
+    return NextResponse.json(
+      {
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        debug: {
+          s3Configured: S3Service.isConfigured(),
+          s3ConfigStatus: S3Service.getConfigStatus()
+        }
+      },
+      { status: 500 }
+    );
   }
 }

@@ -128,7 +128,7 @@ export class S3Service {
         Key: key,
         Body: buffer,
         ContentType: file.type,
-        ACL: 'public-read', // Make the image publicly accessible
+        // Note: ACL removed - bucket should be configured for public access via bucket policy
       });
 
       await client.send(command);
