@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function generateArticleLocally(transcript: string, notes: string) {
+async function generateArticleLocally(transcript: string, _notes: string) {
   try {
     console.log('WORKING: generateArticleLocally called with transcript:', transcript);
     

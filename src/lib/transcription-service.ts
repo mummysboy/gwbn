@@ -1,6 +1,6 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { TranscribeClient, StartTranscriptionJobCommand, GetTranscriptionJobCommand } from '@aws-sdk/client-transcribe';
-import { S3Service } from './s3-service';
+// import { S3Service } from './s3-service';
 
 // Cache for the Transcribe client
 let cachedTranscribeClient: TranscribeClient | null = null;
@@ -296,7 +296,7 @@ export async function transcribeAudioSimple(audioFile: File): Promise<{ success:
  */
 export async function testTranscribeConnection(): Promise<{ success: boolean; message: string }> {
   try {
-    const transcribeClient = getTranscribeClient();
+    const _transcribeClient = getTranscribeClient();
     
     // Try to list transcription jobs (this will test connectivity)
     // Note: This is a simplified test - in production you might want to use a different test

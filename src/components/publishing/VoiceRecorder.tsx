@@ -175,7 +175,7 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
     }
   };
 
-  const startClientSideTranscription = async () => {
+  const _startClientSideTranscription = async () => {
     return new Promise<void>((resolve, reject) => {
       // Check if SpeechRecognition is supported
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

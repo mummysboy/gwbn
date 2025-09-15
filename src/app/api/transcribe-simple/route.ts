@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { transcribeAudio } from '@/lib/openai-utils';
 
 export async function POST(request: NextRequest) {
   try {
