@@ -15,10 +15,10 @@ export const clientCognitoConfig = {
   clientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
 };
 
-// Client-safe S3 configuration
+// Client-safe S3 configuration - hardcoded to avoid environment variable dependency
 export const clientS3Config = {
-  bucketName: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
-  region: process.env.NEXT_PUBLIC_S3_REGION || 'us-west-1',
+  bucketName: 'gwbn-storage',
+  region: 'us-west-1',
 };
 
 // Client-safe API Gateway configuration
