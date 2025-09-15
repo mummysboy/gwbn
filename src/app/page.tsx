@@ -94,197 +94,134 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* WSJ-Style Header */}
-      <header className="border-b-2 border-black">
-        <div className="container mx-auto px-4 py-4">
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-300 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-3 relative">
           <div className="flex items-center justify-between">
-            <div className="text-center">
-              <div className="mb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 text-center">
                 <Image
                   src="/Golden West Business News.png"
                   alt="Golden West Business News"
-                  width={200}
-                  height={80}
-                  className="mx-auto h-16 md:h-20 w-auto"
+                  width={600}
+                  height={240}
+                  className="h-32 w-auto mb-0 mx-auto"
                   priority
                 />
+                <div className="-mt-9">
+                  <p className="text-xs text-gray-600 uppercase tracking-wide">Golden West Business News</p>
+                </div>
               </div>
-            </div>
-            <div className="text-right">
-              <div className="flex items-center justify-end gap-4 mb-2">
-                
+              <div className="absolute right-4 top-28 transform -translate-y-1/2">
+                <p className="text-xs font-medium text-black">
+                  {new Date().toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </p>
               </div>
-              <p className="caption-text text-sm">
-                {new Date().toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </p>
-             
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="max-w-4xl mx-auto px-4 py-4">
         {/* Featured Article */}
         {featuredArticle && (
-          <section className="mb-12">
-            <div className="border-b-2 border-black pb-4 mb-6">
+          <section className="mb-8">
+            <article className="border-b border-gray-200 pb-6">
+              {/* Featured image */}
+              {featuredArticle.images.length > 0 && (
+                <div className="mb-4">
+                  <Image
+                    src={featuredArticle.images[0]}
+                    alt={featuredArticle.title}
+                    width={800}
+                    height={400}
+                    className="w-full h-48 sm:h-64 object-cover"
+                  />
+                </div>
+              )}
               
-            </div>
-            
-            <article className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
+              {/* Article content */}
+              <div>
+                <div className="flex items-center gap-2 mb-2 text-xs text-gray-600 uppercase tracking-wide">
+                  <span className="font-semibold">{featuredArticle.category}</span>
+                  <span>•</span>
+                  <span>{getTimeAgo(featuredArticle.createdAt)}</span>
+                </div>
                 <Link href={`/article/${featuredArticle.id}`}>
-                  <h2 className="headline-serif text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-4 leading-tight hover:text-gray-600 transition-colors cursor-pointer">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-black mb-3 leading-tight hover:text-gray-600 transition-colors cursor-pointer">
                     {featuredArticle.title}
                   </h2>
                 </Link>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="flex items-center gap-2">
-                    <UserIcon className="w-4 h-4 text-gray-600" />
-                    <span className="caption-text">{featuredArticle.author}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <ClockIcon className="w-4 h-4 text-gray-600" />
-                    <span className="caption-text">{getTimeAgo(featuredArticle.createdAt)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="w-4 h-4 text-gray-600" />
-                    <span className="caption-text">{featuredArticle.readTime} min read</span>
-                  </div>
+                <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                  <span>By {featuredArticle.author}</span>
+                  <span>•</span>
+                  <span>{featuredArticle.readTime} min read</span>
                 </div>
-                <div className="body-text text-lg leading-relaxed text-gray-800 mb-6">
-                  {featuredArticle.content.substring(0, 300)}...
-                </div>
-                <div className="flex items-center gap-4">
-                  <button className="flex items-center gap-2 text-black hover:text-gray-600 transition-colors">
-                    <ShareIcon className="w-4 h-4" />
-                    <span className="caption-text">Share</span>
-                  </button>
-                  <Link href={`/article/${featuredArticle.id}`} className="flex items-center gap-2 text-black hover:text-gray-600 transition-colors">
-                    <EyeIcon className="w-4 h-4" />
-                    <span className="caption-text">Read More</span>
-                  </Link>
-                </div>
-              </div>
-              
-              <div className="lg:col-span-1">
-                {/* Newspaper-style main photo - only show 1 photo as thumbnail */}
-                {featuredArticle.images.length > 0 && (
-                  <div className="border-2 border-black mb-4">
-                    <Image
-                      src={featuredArticle.images[0]}
-                      alt={featuredArticle.title}
-                      width={400}
-                      height={500}
-                      className="w-full h-auto"
-                    />
-                  </div>
-                )}
+                <p className="text-gray-800 leading-relaxed text-sm sm:text-base">
+                  {featuredArticle.content.substring(0, 200)}...
+                </p>
               </div>
             </article>
           </section>
         )}
 
-        {/* News Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main News Column */}
-          <div className="lg:col-span-2">
-            <div className="border-b-2 border-black pb-4 mb-6">
-              <span className="caption-text uppercase tracking-wider text-xs font-semibold">
-                Latest News
-              </span>
-            </div>
-            
-            <div className="space-y-8">
-              {articles.slice(1, 4).map((article) => (
-                <article key={article.id} className="article-card">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="md:col-span-2">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="caption-text uppercase text-xs font-semibold text-accent">
-                          {article.category}
-                        </span>
-                        <span className="caption-text">•</span>
-                        <span className="caption-text">{getTimeAgo(article.createdAt)}</span>
-                      </div>
-                      <Link href={`/article/${article.id}`}>
-                        <h3 className="headline-sans text-xl md:text-2xl font-bold text-black mb-3 leading-tight hover:text-gray-600 transition-colors cursor-pointer">
-                          {article.title}
-                        </h3>
-                      </Link>
-                      <p className="body-text text-gray-700 mb-4 leading-relaxed">
-                        {article.content.substring(0, 150)}...
-                      </p>
-                      <div className="flex items-center gap-4">
-                        <span className="caption-text">{article.author}</span>
-                        <span className="caption-text">•</span>
-                        <span className="caption-text">{article.readTime} min read</span>
-                      </div>
-                    </div>
-                    <div className="md:col-span-1">
-                      {/* Newspaper-style main photo - only show 1 photo as thumbnail */}
-                      {article.images.length > 0 && (
-                        <div className="border-2 border-black mb-2">
-                          <Image
-                            src={article.images[0]}
-                            alt={article.title}
-                            width={200}
-                            height={250}
-                            className="w-full h-auto"
-                          />
-                        </div>
-                      )}
-                    </div>
+        {/* News Articles */}
+        <div className="space-y-4">
+          {articles.slice(1, 6).map((article, index) => (
+            <article key={article.id} className="border-b border-gray-200 pb-4 last:border-b-0">
+              <div className="flex gap-4">
+                {/* Article content */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1 text-xs text-gray-600 uppercase tracking-wide">
+                    <span className="font-semibold">{article.category}</span>
+                    <span>•</span>
+                    <span>{getTimeAgo(article.createdAt)}</span>
                   </div>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            {/* More Articles */}
-            <div className="border-t border-gray-200 pt-8">
-              <h3 className="headline-sans text-lg font-bold text-black mb-4">
-                More Stories
-              </h3>
-              <div className="space-y-4">
-                {articles.slice(4).map((article) => (
-                  <article key={article.id} className="border-b border-gray-200 pb-4 last:border-b-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="caption-text uppercase text-xs font-semibold text-accent">
-                        {article.category}
-                      </span>
-                      <span className="caption-text">•</span>
-                      <span className="caption-text">{getTimeAgo(article.createdAt)}</span>
-                    </div>
-                    <Link href={`/article/${article.id}`}>
-                      <h4 className="headline-sans text-sm font-bold text-black mb-2 leading-tight hover:text-gray-600 transition-colors cursor-pointer">
-                        {article.title}
-                      </h4>
-                    </Link>
-                    <p className="caption-text text-xs">
-                      {article.author} • {article.readTime} min read
-                    </p>
-                  </article>
-                ))}
+                  <Link href={`/article/${article.id}`}>
+                    <h3 className="text-base sm:text-lg font-bold text-black mb-2 leading-tight hover:text-gray-600 transition-colors cursor-pointer">
+                      {article.title}
+                    </h3>
+                  </Link>
+                  <p className="text-gray-600 text-sm leading-relaxed mb-2">
+                    {article.content.substring(0, 120)}...
+                  </p>
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span>By {article.author}</span>
+                    <span>•</span>
+                    <span>{article.readTime} min read</span>
+                  </div>
+                </div>
+                
+                {/* Thumbnail image */}
+                {article.images.length > 0 && (
+                  <div className="flex-shrink-0">
+                    <Image
+                      src={article.images[0]}
+                      alt={article.title}
+                      width={120}
+                      height={80}
+                      className="w-24 h-16 sm:w-28 sm:h-20 object-cover"
+                    />
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
+            </article>
+          ))}
         </div>
+
       </main>
 
       {/* Footer */}
-      <footer className="border-t-2 border-black mt-16">
-        <div className="container mx-auto px-4 py-8">
+      <footer className="border-t border-gray-200 mt-12">
+        <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="text-center">
-            <p className="caption-text text-xs">
-              © 2024 Golden West Business News. All rights reserved. Built with Next.js, TypeScript, and AI.
+            <p className="text-xs text-gray-500">
+              © 2024 Golden West Business News. All rights reserved.
             </p>
           </div>
         </div>

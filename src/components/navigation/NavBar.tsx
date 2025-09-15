@@ -34,16 +34,7 @@ export default function NavBar() {
     <nav className="bg-white border-b border-gray-300">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-12">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <Image
-              src="/Golden West Business News.png"
-              alt="Golden West Business News"
-              width={120}
-              height={48}
-              className="h-8 w-auto"
-            />
-          </Link>
+  
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
