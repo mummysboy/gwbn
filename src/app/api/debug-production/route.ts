@@ -40,7 +40,7 @@ export async function GET() {
       
       // Try with explicit credentials first
       if (process.env.ACCESS_KEY_ID && process.env.SECRET_ACCESS_KEY) {
-        const _client = new DynamoDBClient({
+        new DynamoDBClient({
           region: process.env.REGION || 'us-east-1',
           credentials: {
             accessKeyId: process.env.ACCESS_KEY_ID,
@@ -50,7 +50,7 @@ export async function GET() {
         awsClientTest = { method: 'explicit_credentials', success: true };
       } else {
         // Try with default credentials (IAM role)
-        const _client = new DynamoDBClient({
+        new DynamoDBClient({
           region: process.env.REGION || 'us-east-1',
         });
         awsClientTest = { method: 'default_credentials', success: true };

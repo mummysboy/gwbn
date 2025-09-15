@@ -186,8 +186,7 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
   const startClientSideTranscription = async () => {
     return new Promise<void>((resolve, reject) => {
       // Check if SpeechRecognition is supported
-      const SpeechRecognition = (window as unknown as { SpeechRecognition?: typeof SpeechRecognition; webkitSpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition || 
-                               (window as unknown as { SpeechRecognition?: typeof SpeechRecognition; webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition;
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       
       if (!SpeechRecognition) {
         reject(new Error('Speech recognition not supported in this browser'));
@@ -201,7 +200,7 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
 
       let finalTranscript = '';
 
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
+      recognition.onresult = (event: any) => {
         let interimTranscript = '';
         
         for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -229,7 +228,7 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
         }
       };
 
-      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      recognition.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
         reject(new Error(`Speech recognition failed: ${event.error}`));
       };

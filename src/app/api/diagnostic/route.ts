@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(_request: NextRequest) {
+export async function POST() {
   return NextResponse.json(
     { 
       error: 'POST method not supported for diagnostics',

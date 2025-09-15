@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(_request: NextRequest) {
+export async function POST() {
   try {
     console.log('Client-side Transcription API: Starting request');
     
