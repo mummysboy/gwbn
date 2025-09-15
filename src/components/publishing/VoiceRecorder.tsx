@@ -141,8 +141,8 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
       }
       
       // Use local transcription endpoint (no environment variables required)
-      console.log('Making POST request to /api/transcribe-simple (local processing)');
-      const response = await fetch('/api/transcribe-simple', {
+      console.log('Making POST request to /api/transcribe (local processing)');
+      const response = await fetch('/api/transcribe', {
         method: 'POST',
         body: formData,
       });
