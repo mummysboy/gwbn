@@ -94,11 +94,13 @@ function ArticleContentWithPhotos({ content, images, title }: ArticleContentWith
           return (
             <div key={index} className="w-full mb-6">
               <div className={`${borderClass} max-w-md mx-auto`}>
-                <img
+                <Image
                   src={item.src}
                   alt={item.alt}
+                  width={400}
+                  height={isThumbnail ? 500 : 300}
                   className="w-full h-auto"
-                  style={{ maxWidth: '400px', height: isThumbnail ? '500px' : '300px', objectFit: 'cover' }}
+                  style={{ objectFit: 'cover' }}
                 />
               </div>
             </div>
@@ -461,7 +463,7 @@ export default function ArticlePage() {
             >
               <div className="flex-shrink-0">
                 <div className="w-20 h-16 bg-gray-100 rounded overflow-hidden">
-                  <img
+                  <Image
                     src={
                       allArticles[
                         currentIndex > 0
@@ -476,8 +478,9 @@ export default function ArticlePage() {
                           : allArticles.length - 1
                       ]?.title || ""
                     }
+                    width={80}
+                    height={64}
                     className="w-full h-full object-cover"
-                    style={{ width: '80px', height: '64px' }}
                   />
                 </div>
               </div>
@@ -525,7 +528,7 @@ export default function ArticlePage() {
             >
               <div className="flex-shrink-0">
                 <div className="w-20 h-16 bg-gray-100 rounded overflow-hidden">
-                  <img
+                  <Image
                     src={
                       allArticles[
                         currentIndex < allArticles.length - 1
@@ -540,8 +543,9 @@ export default function ArticlePage() {
                           : 0
                       ]?.title || ""
                     }
+                    width={80}
+                    height={64}
                     className="w-full h-full object-cover"
-                    style={{ width: '80px', height: '64px' }}
                   />
                 </div>
               </div>

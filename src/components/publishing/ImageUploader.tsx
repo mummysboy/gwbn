@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
+import Image from 'next/image';
 import { 
   PhotoIcon, 
   XMarkIcon, 
@@ -191,11 +192,12 @@ export default function ImageUploader({ images, onImagesChange }: ImageUploaderP
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {images.map((image, index) => (
               <div key={index} className="relative group">
-                <img
+                <Image
                   src={image}
                   alt={`Upload ${index + 1}`}
+                  width={200}
+                  height={128}
                   className="w-full h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
-                  style={{ width: '200px', height: '128px' }}
                 />
                 
                 {/* Remove Button */}

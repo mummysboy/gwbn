@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         url: result.url,
-        key: 'key' in result ? result.key : result.filename
+        key: 'key' in result ? result.key : ('filename' in result ? result.filename : undefined)
       });
     } else {
       return NextResponse.json(
