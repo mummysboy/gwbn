@@ -39,7 +39,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Golden West Business News" />
       </head>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased pt-10">
         <NavBar />
         {children}
       </body>

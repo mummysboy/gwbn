@@ -1,13 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  ClockIcon, 
-  UserIcon, 
-  EyeIcon,
-  ShareIcon,
-  CalendarIcon,
-} from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -94,7 +87,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* WSJ-Style Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-300 shadow-sm">
+      <header className="bg-white border-b border-gray-300 shadow-sm -mt-2">
         <div className="max-w-4xl mx-auto px-4 py-3 relative">
           <div className="flex items-center justify-between">
             <div className="flex items-center justify-between">
@@ -172,7 +165,7 @@ export default function Home() {
 
         {/* News Articles */}
         <div className="space-y-4">
-          {articles.slice(1, 6).map((article, index) => (
+          {articles.slice(1, 6).map((article) => (
             <article key={article.id} className="border-b border-gray-200 pb-4 last:border-b-0">
               <div className="flex gap-4">
                 {/* Article content */}
