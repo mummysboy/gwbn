@@ -21,7 +21,7 @@ export async function GET() {
       const { DynamoDBClient } = await import('@aws-sdk/client-dynamodb');
       
       if (process.env.REGION && process.env.ACCESS_KEY_ID && process.env.SECRET_ACCESS_KEY) {
-        const client = new DynamoDBClient({
+        const _client = new DynamoDBClient({
           region: process.env.REGION,
           credentials: {
             accessKeyId: process.env.ACCESS_KEY_ID,

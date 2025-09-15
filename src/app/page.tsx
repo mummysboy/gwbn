@@ -7,7 +7,6 @@ import {
   EyeIcon,
   ShareIcon,
   CalendarIcon,
-  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -27,7 +26,7 @@ interface Article {
 export default function Home() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [featuredArticle, setFeaturedArticle] = useState<Article | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
 
   const fetchArticles = async () => {
     setIsLoading(true);

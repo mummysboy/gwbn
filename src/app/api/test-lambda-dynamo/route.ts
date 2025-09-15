@@ -19,7 +19,7 @@ export async function GET() {
     // Approach 1: Default credentials (IAM role)
     try {
       const { DynamoDBClient } = await import('@aws-sdk/client-dynamodb');
-      const client1 = new DynamoDBClient({
+      const _client1 = new DynamoDBClient({
         region: process.env.AWS_REGION || 'us-west-1',
       });
       clientTests.push({ approach: 'default_credentials', success: true, error: null });
@@ -34,7 +34,7 @@ export async function GET() {
     // Approach 2: Explicit region only
     try {
       const { DynamoDBClient } = await import('@aws-sdk/client-dynamodb');
-      const client2 = new DynamoDBClient({
+      const _client2 = new DynamoDBClient({
         region: 'us-west-1',
       });
       clientTests.push({ approach: 'explicit_region_only', success: true, error: null });

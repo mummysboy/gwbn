@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PollyClient, SynthesizeSpeechCommand } from '@aws-sdk/client-polly';
 
 export async function POST(request: NextRequest) {
   try {
