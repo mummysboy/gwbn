@@ -186,6 +186,7 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
   const startClientSideTranscription = async () => {
     return new Promise<void>((resolve, reject) => {
       // Check if SpeechRecognition is supported
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       
       if (!SpeechRecognition) {
@@ -200,6 +201,7 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
 
       let finalTranscript = '';
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recognition.onresult = (event: any) => {
         let interimTranscript = '';
         
@@ -228,6 +230,7 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
         }
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recognition.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
         reject(new Error(`Speech recognition failed: ${event.error}`));
