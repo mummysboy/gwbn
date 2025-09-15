@@ -1,18 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Disable image optimization for Amplify compatibility
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        port: '',
-        pathname: '/**',
-      },
-    ],
-    // Allow local images from uploads directory
-    domains: ['localhost', '127.0.0.1'],
-    unoptimized: true, // Disable optimization for local images to avoid issues
+    unoptimized: true,
   },
   // Ensure static files are served correctly
   async rewrites() {
@@ -23,6 +14,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Add experimental features for better Amplify compatibility
+  experimental: {
+    // Disable server components caching for Amplify
+    serverComponentsExternalPackages: [],
+  },
+  // Ensure proper build output for Amplify
+  trailingSlash: false,
+  // Disable static optimization for dynamic routes
+  generateStaticParams: false,
 };
 
 export default nextConfig;
