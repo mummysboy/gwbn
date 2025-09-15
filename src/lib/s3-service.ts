@@ -148,7 +148,7 @@ export class S3Service {
       const pathname = urlObj.pathname;
       // Remove leading slash and extract the key
       return pathname.startsWith('/') ? pathname.substring(1) : pathname;
-    } catch (error) {
+    } catch {
       console.error('S3 Service: Invalid URL:', url);
       return null;
     }
