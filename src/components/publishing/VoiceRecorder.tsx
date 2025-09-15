@@ -124,9 +124,21 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
     setIsTranscribing(true);
     
     try {
+      // Debug: Check audio blob
+      console.log('Audio blob details:', {
+        size: audioBlob.size,
+        type: audioBlob.type
+      });
+      
       // Create FormData to send the audio file
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
+      
+      // Debug: Check FormData
+      console.log('FormData entries:');
+      for (const [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
       
       // Use local transcription endpoint (no environment variables required)
       console.log('Making POST request to /api/transcribe-simple (local processing)');
