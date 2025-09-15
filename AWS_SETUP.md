@@ -41,14 +41,14 @@ Update `.env.local` with your AWS configuration:
 
 ```env
 # AWS Configuration
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your_access_key_here
-AWS_SECRET_ACCESS_KEY=your_secret_key_here
+REGION=us-east-1
+ACCESS_KEY_ID=your_access_key_here
+SECRET_ACCESS_KEY=your_secret_key_here
 
 # DynamoDB Tables
-DYNAMODB_ARTICLES_TABLE=gwbn-articles
-DYNAMODB_USERS_TABLE=gwbn-users
-DYNAMODB_ANALYTICS_TABLE=gwbn-analytics
+ARTICLES_TABLE=gwbn-articles
+USERS_TABLE=gwbn-users
+ANALYTICS_TABLE=gwbn-analytics
 
 # OpenAI Configuration (for transcription fallback)
 OPENAI_API_KEY=your_openai_api_key_here

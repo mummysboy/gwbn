@@ -12,23 +12,23 @@ export async function GET() {
       config: configStatus,
       environment: {
         NODE_ENV: process.env.NODE_ENV,
-        AWS_REGION: process.env.AWS_REGION,
-        AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID ? 'Set' : 'Not set',
-        AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY ? 'Set' : 'Not set',
-        DYNAMODB_ARTICLES_TABLE: process.env.DYNAMODB_ARTICLES_TABLE || 'gwbn-articles',
-        DYNAMODB_USERS_TABLE: process.env.DYNAMODB_USERS_TABLE || 'gwbn-users',
-        DYNAMODB_ANALYTICS_TABLE: process.env.DYNAMODB_ANALYTICS_TABLE || 'gwbn-analytics',
+        REGION: process.env.REGION,
+        ACCESS_KEY_ID: process.env.ACCESS_KEY_ID ? 'Set' : 'Not set',
+        SECRET_ACCESS_KEY: process.env.SECRET_ACCESS_KEY ? 'Set' : 'Not set',
+        ARTICLES_TABLE: process.env.ARTICLES_TABLE || 'gwbn-articles',
+        USERS_TABLE: process.env.USERS_TABLE || 'gwbn-users',
+        ANALYTICS_TABLE: process.env.ANALYTICS_TABLE || 'gwbn-analytics',
       },
       hosting: {
-        platform: process.env.VERCEL ? 'Vercel' : process.env.AWS_AMPLIFY_APP_ID ? 'AWS Amplify' : 'Unknown',
+        platform: process.env.VERCEL ? 'Vercel' : process.env.AMPLIFY_APP_ID ? 'AWS Amplify' : 'Unknown',
         vercel: !!process.env.VERCEL,
-        amplify: !!process.env.AWS_AMPLIFY_APP_ID,
+        amplify: !!process.env.AMPLIFY_APP_ID,
       },
       recommendations: isValid ? [] : [
-        'Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables',
+        'Set ACCESS_KEY_ID and SECRET_ACCESS_KEY environment variables',
         'Ensure DynamoDB tables exist in the correct region',
         'Verify IAM permissions for DynamoDB access',
-        'Check that AWS_REGION matches your DynamoDB region'
+        'Check that REGION matches your DynamoDB region'
       ]
     });
     

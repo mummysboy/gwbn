@@ -9,9 +9,9 @@ export interface AWSConfig {
 }
 
 export const awsConfig: AWSConfig = {
-  region: process.env.AWS_REGION || 'us-east-1',
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.REGION || 'us-east-1',
+  accessKeyId: process.env.ACCESS_KEY_ID,
+  secretAccessKey: process.env.SECRET_ACCESS_KEY,
 };
 
 export const appConfig = {
@@ -40,7 +40,7 @@ export const apiGatewayConfig = {
 
 // Validation function to check if required AWS config is present
 export function validateAWSConfig(): boolean {
-  const requiredVars = ['AWS_REGION'];
+  const requiredVars = ['REGION'];
   const missingVars = requiredVars.filter(varName => !process.env[varName]);
   
   if (missingVars.length > 0) {
@@ -50,10 +50,10 @@ export function validateAWSConfig(): boolean {
   
   // Check if we have credentials (either access keys or IAM role)
   const hasAccessKeys = !!(awsConfig.accessKeyId && awsConfig.secretAccessKey);
-  const hasIAMRole = !!(process.env.AWS_ROLE_ARN || process.env.AWS_WEB_IDENTITY_TOKEN_FILE);
+  const hasIAMRole = !!(process.env.ROLE_ARN || process.env.WEB_IDENTITY_TOKEN_FILE);
   
   if (!hasAccessKeys && !hasIAMRole) {
-    console.warn('No AWS credentials found. Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY, or use IAM roles.');
+    console.warn('No AWS credentials found. Set ACCESS_KEY_ID and SECRET_ACCESS_KEY, or use IAM roles.');
     return false;
   }
   
@@ -66,14 +66,14 @@ export function getAWSConfigStatus() {
     region: awsConfig.region,
     hasAccessKey: !!awsConfig.accessKeyId,
     hasSecretKey: !!awsConfig.secretAccessKey,
-    hasIAMRole: !!(process.env.AWS_ROLE_ARN || process.env.AWS_WEB_IDENTITY_TOKEN_FILE),
+    hasIAMRole: !!(process.env.ROLE_ARN || process.env.WEB_IDENTITY_TOKEN_FILE),
     environment: process.env.NODE_ENV,
     isVercel: !!process.env.VERCEL,
-    isAmplify: !!process.env.AWS_AMPLIFY_APP_ID,
+    isAmplify: !!process.env.AMPLIFY_APP_ID,
     tables: {
-      articles: process.env.DYNAMODB_ARTICLES_TABLE || 'gwbn-articles',
-      users: process.env.DYNAMODB_USERS_TABLE || 'gwbn-users',
-      analytics: process.env.DYNAMODB_ANALYTICS_TABLE || 'gwbn-analytics',
+      articles: process.env.ARTICLES_TABLE || 'gwbn-articles',
+      users: process.env.USERS_TABLE || 'gwbn-users',
+      analytics: process.env.ANALYTICS_TABLE || 'gwbn-analytics',
     }
   };
 }

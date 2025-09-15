@@ -4,7 +4,7 @@ import { awsConfig } from './aws-config';
 
 // Check if AWS credentials are configured
 const hasAWSCredentials = awsConfig.accessKeyId && awsConfig.secretAccessKey;
-const hasIAMRole = !!(process.env.AWS_ROLE_ARN || process.env.AWS_WEB_IDENTITY_TOKEN_FILE);
+const hasIAMRole = !!(process.env.ROLE_ARN || process.env.WEB_IDENTITY_TOKEN_FILE);
 
 // Initialize DynamoDB client
 let client: DynamoDBClient | null = null;
@@ -31,9 +31,9 @@ const docClient = client ? DynamoDBDocumentClient.from(client) : null;
 
 // Table names
 export const TABLES = {
-  ARTICLES: process.env.DYNAMODB_ARTICLES_TABLE || 'gwbn-articles',
-  USERS: process.env.DYNAMODB_USERS_TABLE || 'gwbn-users',
-  ANALYTICS: process.env.DYNAMODB_ANALYTICS_TABLE || 'gwbn-analytics',
+  ARTICLES: process.env.ARTICLES_TABLE || 'gwbn-articles',
+  USERS: process.env.USERS_TABLE || 'gwbn-users',
+  ANALYTICS: process.env.ANALYTICS_TABLE || 'gwbn-analytics',
 } as const;
 
 // Article interface

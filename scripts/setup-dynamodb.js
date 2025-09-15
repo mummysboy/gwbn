@@ -2,16 +2,16 @@ const { DynamoDBClient, CreateTableCommand, DescribeTableCommand } = require('@a
 
 // Initialize DynamoDB client
 const client = new DynamoDBClient({
-  region: process.env.AWS_REGION || 'us-east-1',
-  credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.REGION || 'us-east-1',
+  credentials: process.env.ACCESS_KEY_ID && process.env.SECRET_ACCESS_KEY ? {
+    accessKeyId: process.env.ACCESS_KEY_ID,
+    secretAccessKey: process.env.SECRET_ACCESS_KEY,
   } : undefined,
 });
 
 const tables = [
   {
-    TableName: process.env.DYNAMODB_ARTICLES_TABLE || 'gwbn-articles',
+    TableName: process.env.ARTICLES_TABLE || 'gwbn-articles',
     KeySchema: [
       { AttributeName: 'id', KeyType: 'HASH' }
     ],
@@ -34,7 +34,7 @@ const tables = [
     BillingMode: 'PAY_PER_REQUEST'
   },
   {
-    TableName: process.env.DYNAMODB_USERS_TABLE || 'gwbn-users',
+    TableName: process.env.USERS_TABLE || 'gwbn-users',
     KeySchema: [
       { AttributeName: 'id', KeyType: 'HASH' }
     ],
@@ -55,7 +55,7 @@ const tables = [
     BillingMode: 'PAY_PER_REQUEST'
   },
   {
-    TableName: process.env.DYNAMODB_ANALYTICS_TABLE || 'gwbn-analytics',
+    TableName: process.env.ANALYTICS_TABLE || 'gwbn-analytics',
     KeySchema: [
       { AttributeName: 'id', KeyType: 'HASH' }
     ],

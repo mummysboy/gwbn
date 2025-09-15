@@ -6,16 +6,16 @@ When deploying to AWS Amplify, Vercel, or other hosting platforms, you **MUST** 
 
 ### Required AWS Variables
 ```env
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your_actual_access_key
-AWS_SECRET_ACCESS_KEY=your_actual_secret_key
+REGION=us-east-1
+ACCESS_KEY_ID=your_actual_access_key
+SECRET_ACCESS_KEY=your_actual_secret_key
 ```
 
 ### DynamoDB Table Names
 ```env
-DYNAMODB_ARTICLES_TABLE=gwbn-articles
-DYNAMODB_USERS_TABLE=gwbn-users
-DYNAMODB_ANALYTICS_TABLE=gwbn-analytics
+ARTICLES_TABLE=gwbn-articles
+USERS_TABLE=gwbn-users
+ANALYTICS_TABLE=gwbn-analytics
 ```
 
 ### Optional Variables
@@ -45,9 +45,9 @@ You need to create the DynamoDB tables in your AWS account:
 #### Option B: Use AWS CLI
 ```bash
 # Set your AWS credentials
-export AWS_ACCESS_KEY_ID=your_key
-export AWS_SECRET_ACCESS_KEY=your_secret
-export AWS_DEFAULT_REGION=us-east-1
+export ACCESS_KEY_ID=your_key
+export SECRET_ACCESS_KEY=your_secret
+export REGION=us-east-1
 
 # Run the setup script
 npm run setup-db
@@ -100,7 +100,7 @@ After deployment, test these endpoints:
 
 ### Issue 1: "AWS DynamoDB client not configured"
 **Cause**: Missing AWS credentials
-**Solution**: Set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in hosting platform
+**Solution**: Set `ACCESS_KEY_ID` and `SECRET_ACCESS_KEY` in hosting platform
 
 ### Issue 2: "Table not found"
 **Cause**: DynamoDB tables don't exist
@@ -112,7 +112,7 @@ After deployment, test these endpoints:
 
 ### Issue 4: "Region mismatch"
 **Cause**: Wrong AWS region
-**Solution**: Set `AWS_REGION` environment variable to match your DynamoDB region
+**Solution**: Set `REGION` environment variable to match your DynamoDB region
 
 ## Security Best Practices
 
