@@ -1,38 +1,70 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { awsConfig, s3Config } from './aws-config';
 
-// Check if AWS credentials are configured
-const hasAWSCredentials = awsConfig.accessKeyId && awsConfig.secretAccessKey;
-const hasIAMRole = !!(process.env.ROLE_ARN || process.env.WEB_IDENTITY_TOKEN_FILE);
-const isLambda = !!(process.env.AWS_LAMBDA_FUNCTION_NAME);
+// Server-only imports - these will throw errors if imported by client components
+interface ServerAWSConfig {
+  region: string;
+  accessKeyId?: string;
+  secretAccessKey?: string;
+}
+
+interface ClientS3Config {
+  bucketName?: string;
+  region: string;
+}
+
+let serverAWSConfig: ServerAWSConfig | null = null;
+let serverS3Config: ClientS3Config | null = null;
+let hasAWSCredentials = false;
+let hasIAMRole = false;
+let isLambda = false;
+
+// Initialize server-side configuration only
+if (typeof window === 'undefined') {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+    const serverConfig = require('./server-aws-config');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+    const clientConfig = require('./client-config');
+    
+    serverAWSConfig = serverConfig.serverAWSConfig;
+    serverS3Config = clientConfig.clientS3Config;
+    
+    // Check if AWS credentials are configured
+    hasAWSCredentials = !!(serverAWSConfig?.accessKeyId && serverAWSConfig?.secretAccessKey);
+    hasIAMRole = !!(process.env.ROLE_ARN || process.env.WEB_IDENTITY_TOKEN_FILE);
+    isLambda = !!(process.env.AWS_LAMBDA_FUNCTION_NAME);
+  } catch (error) {
+    console.error('Failed to load server configuration:', error);
+  }
+}
 
 console.log('S3 Service: Initialization check:', {
   hasAWSCredentials,
   hasIAMRole,
   isLambda,
-  region: awsConfig.region,
-  hasAccessKey: !!awsConfig.accessKeyId,
-  hasSecretKey: !!awsConfig.secretAccessKey,
-  bucketName: s3Config.bucketName,
-  s3Region: s3Config.region
+  region: serverAWSConfig?.region || 'NOT_CONFIGURED',
+  hasAccessKey: !!serverAWSConfig?.accessKeyId,
+  hasSecretKey: !!serverAWSConfig?.secretAccessKey,
+  bucketName: serverS3Config?.bucketName || 'NOT_CONFIGURED',
+  s3Region: serverS3Config?.region || 'NOT_CONFIGURED'
 });
 
 // Initialize S3 client
 let s3Client: S3Client | null = null;
 
-if (hasAWSCredentials) {
+if (hasAWSCredentials && serverAWSConfig && serverS3Config) {
   console.log('S3 Service: Using access key credentials');
   s3Client = new S3Client({
-    region: s3Config.region,
+    region: serverS3Config.region,
     credentials: {
-      accessKeyId: awsConfig.accessKeyId!,
-      secretAccessKey: awsConfig.secretAccessKey!,
+      accessKeyId: serverAWSConfig.accessKeyId!,
+      secretAccessKey: serverAWSConfig.secretAccessKey!,
     },
   });
 } else if (hasIAMRole || isLambda) {
   console.log('S3 Service: Using IAM role/Lambda credentials');
   s3Client = new S3Client({
-    region: s3Config.region,
+    region: serverS3Config?.region || 'us-west-1',
   });
 } else {
   console.warn('S3 Service: No AWS credentials found. S3 operations will fail.');
@@ -57,7 +89,7 @@ export class S3Service {
       };
     }
 
-    if (!s3Config.bucketName) {
+    if (!serverS3Config?.bucketName) {
       return {
         success: false,
         error: 'S3 bucket name not configured. Please set NEXT_PUBLIC_S3_BUCKET_NAME environment variable.'
@@ -77,7 +109,7 @@ export class S3Service {
 
       // Upload to S3
       const command = new PutObjectCommand({
-        Bucket: s3Config.bucketName,
+        Bucket: serverS3Config.bucketName,
         Key: key,
         Body: buffer,
         ContentType: file.type,
@@ -87,7 +119,7 @@ export class S3Service {
       await s3Client.send(command);
 
       // Generate the public URL
-      const url = `https://${s3Config.bucketName}.s3.${s3Config.region}.amazonaws.com/${key}`;
+      const url = `https://${serverS3Config.bucketName}.s3.${serverS3Config.region}.amazonaws.com/${key}`;
 
       console.log('S3 Service: Successfully uploaded image:', { key, url });
 
@@ -118,14 +150,14 @@ export class S3Service {
    * Delete an image from S3
    */
   static async deleteImage(key: string): Promise<boolean> {
-    if (!s3Client || !s3Config.bucketName) {
+    if (!s3Client || !serverS3Config?.bucketName) {
       console.error('S3 Service: Cannot delete image - S3 not configured');
       return false;
     }
 
     try {
       const command = new DeleteObjectCommand({
-        Bucket: s3Config.bucketName,
+        Bucket: serverS3Config.bucketName,
         Key: key,
       });
 
@@ -160,9 +192,9 @@ export class S3Service {
   static isConfigured(): boolean {
     return !!(
       s3Client && 
-      s3Config.bucketName && 
-      s3Config.bucketName !== 'your_bucket_name' &&
-      s3Config.bucketName.length > 0
+      serverS3Config?.bucketName && 
+      serverS3Config.bucketName !== 'your_bucket_name' &&
+      serverS3Config.bucketName.length > 0
     );
   }
 
@@ -172,8 +204,8 @@ export class S3Service {
   static getConfigStatus() {
     return {
       hasClient: !!s3Client,
-      bucketName: s3Config.bucketName,
-      region: s3Config.region,
+      bucketName: serverS3Config?.bucketName || 'NOT_CONFIGURED',
+      region: serverS3Config?.region || 'NOT_CONFIGURED',
       hasAWSCredentials,
       hasIAMRole,
       isLambda

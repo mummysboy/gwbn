@@ -1,81 +1,92 @@
 /**
  * AWS Configuration utilities for the GWBN application
+ * WARNING: This file contains both client and server configurations.
+ * Use server-aws-config.ts for server-only operations.
+ * Use client-config.ts for client-safe configurations.
  */
 
+// Re-export client-safe configurations
+export { 
+  clientAppConfig as appConfig,
+  clientCognitoConfig as cognitoConfig,
+  clientS3Config as s3Config,
+  clientApiGatewayConfig as apiGatewayConfig,
+  clientEnvironment as environment
+} from './client-config';
+
+// Legacy interface for backward compatibility
 export interface AWSConfig {
   region: string;
   accessKeyId?: string;
   secretAccessKey?: string;
 }
 
-export const awsConfig: AWSConfig = {
-  region: process.env.REGION || process.env.AWS_REGION || 'us-west-1',
-  accessKeyId: process.env.ACCESS_KEY_ID,
-  secretAccessKey: process.env.SECRET_ACCESS_KEY,
-};
+// Legacy awsConfig - now uses server configuration when available
+export const awsConfig: AWSConfig = (() => {
+  // Check if we're on the server side
+  if (typeof window === 'undefined') {
+    // Server-side: use server configuration
+    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+    const { serverAWSConfig } = require('./server-aws-config');
+    return serverAWSConfig;
+  } else {
+    // Client-side: return safe configuration (no secrets)
+    return {
+      region: process.env.NEXT_PUBLIC_S3_REGION || 'us-west-1',
+      // Never expose access keys on client side
+    };
+  }
+})();
 
-export const appConfig = {
-  name: process.env.NEXT_PUBLIC_APP_NAME || 'GWBN',
-  version: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
-  environment: process.env.NODE_ENV || 'development',
-};
-
-export const databaseConfig = {
-  url: process.env.DATABASE_URL,
-};
-
-export const cognitoConfig = {
-  userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
-  clientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
-};
-
-export const s3Config = {
-  bucketName: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
-  region: process.env.NEXT_PUBLIC_S3_REGION || 'us-west-1',
-};
-
-export const apiGatewayConfig = {
-  url: process.env.NEXT_PUBLIC_API_GATEWAY_URL,
-};
+// Legacy databaseConfig - server-only
+export const databaseConfig = (() => {
+  if (typeof window === 'undefined') {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+    const { serverDatabaseConfig } = require('./server-aws-config');
+    return serverDatabaseConfig;
+  } else {
+    // Client-side: return empty config (database should not be accessed from client)
+    return {};
+  }
+})();
 
 // Validation function to check if required AWS config is present
 export function validateAWSConfig(): boolean {
-  const requiredVars = ['REGION'];
-  const missingVars = requiredVars.filter(varName => !process.env[varName]);
-  
-  if (missingVars.length > 0) {
-    console.warn(`Missing AWS environment variables: ${missingVars.join(', ')}`);
-    return false;
+  if (typeof window === 'undefined') {
+    // Server-side: use server validation
+    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+    const { validateServerAWSConfig } = require('./server-aws-config');
+    return validateServerAWSConfig();
+  } else {
+    // Client-side: always return true (no server credentials needed)
+    return true;
   }
-  
-  // Check if we have credentials (either access keys or IAM role)
-  const hasAccessKeys = !!(awsConfig.accessKeyId && awsConfig.secretAccessKey);
-  const hasIAMRole = !!(process.env.ROLE_ARN || process.env.WEB_IDENTITY_TOKEN_FILE);
-  
-  if (!hasAccessKeys && !hasIAMRole) {
-    console.warn('No AWS credentials found. Set ACCESS_KEY_ID and SECRET_ACCESS_KEY, or use IAM roles.');
-    return false;
-  }
-  
-  return true;
 }
 
 // Get detailed AWS configuration status for debugging
 export function getAWSConfigStatus() {
-  return {
-    region: awsConfig.region,
-    hasAccessKey: !!awsConfig.accessKeyId,
-    hasSecretKey: !!awsConfig.secretAccessKey,
-    hasIAMRole: !!(process.env.ROLE_ARN || process.env.WEB_IDENTITY_TOKEN_FILE),
-    environment: process.env.NODE_ENV,
-    isVercel: !!process.env.VERCEL,
-    isAmplify: !!process.env.AMPLIFY_APP_ID,
-    tables: {
-      articles: process.env.ARTICLES_TABLE || 'gwbn-articles',
-      users: process.env.USERS_TABLE || 'gwbn-users',
-      analytics: process.env.ANALYTICS_TABLE || 'gwbn-analytics',
-    }
-  };
+  if (typeof window === 'undefined') {
+    // Server-side: use server status
+    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+    const { getServerAWSConfigStatus } = require('./server-aws-config');
+    return getServerAWSConfigStatus();
+  } else {
+    // Client-side: return safe status (no secrets)
+    return {
+      region: awsConfig.region,
+      hasAccessKey: false, // Never expose on client
+      hasSecretKey: false, // Never expose on client
+      hasIAMRole: false,   // Never expose on client
+      environment: process.env.NODE_ENV,
+      isVercel: false,
+      isAmplify: false,
+      tables: {
+        articles: 'gwbn-articles', // Default values only
+        users: 'gwbn-users',
+        analytics: 'gwbn-analytics',
+      }
+    };
+  }
 }
 
 // Helper function to get AWS credentials for client-side usage

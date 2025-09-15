@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Container from '@/components/layout/Container';
+import { clientEnvironment } from '@/lib/client-config';
 import VoiceRecorder from '@/components/publishing/VoiceRecorder';
 import TranscriptEditor from '@/components/publishing/TranscriptEditor';
 import AIEnhancer from '@/components/publishing/AIEnhancer';
@@ -355,7 +356,7 @@ export default function PublishPage() {
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-lg font-semibold"
                   />
                   {/* Debug info */}
-                  {process.env.NODE_ENV === 'development' && (
+                  {clientEnvironment.isDevelopment && (
                     <div className="mt-2 text-xs text-gray-500">
                       Debug: articleTitle = &quot;{articleTitle}&quot;
                     </div>
@@ -381,7 +382,7 @@ export default function PublishPage() {
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-vertical"
                   />
                   {/* Debug info */}
-                  {process.env.NODE_ENV === 'development' && (
+                  {clientEnvironment.isDevelopment && (
                     <div className="mt-2 text-xs text-gray-500 space-y-1">
                       <div>Debug: articleContent length: {articleContent.length}, transcript length: {transcript.length}</div>
                       <div>articleContent preview: &quot;{articleContent.substring(0, 100)}...&quot;</div>

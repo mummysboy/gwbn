@@ -1,40 +1,71 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, GetCommand, ScanCommand, DeleteCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
-import { awsConfig } from './aws-config';
 
-// Check if AWS credentials are configured
-const hasAWSCredentials = awsConfig.accessKeyId && awsConfig.secretAccessKey;
-const hasIAMRole = !!(process.env.ROLE_ARN || process.env.WEB_IDENTITY_TOKEN_FILE);
-const isLambda = !!(process.env.AWS_LAMBDA_FUNCTION_NAME);
+// Server-only imports - these will throw errors if imported by client components
+interface ServerAWSConfig {
+  region: string;
+  accessKeyId?: string;
+  secretAccessKey?: string;
+}
+
+interface ServerTableNames {
+  articles: string;
+  users: string;
+  analytics: string;
+}
+
+let serverAWSConfig: ServerAWSConfig | null = null;
+let serverTableNames: ServerTableNames | null = null;
+let hasAWSCredentials = false;
+let hasIAMRole = false;
+let isLambda = false;
+
+// Initialize server-side configuration only
+if (typeof window === 'undefined') {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const serverConfig = require('./server-aws-config');
+    
+    serverAWSConfig = serverConfig.serverAWSConfig;
+    serverTableNames = serverConfig.serverTableNames;
+    
+    // Check if AWS credentials are configured
+    hasAWSCredentials = !!(serverAWSConfig?.accessKeyId && serverAWSConfig?.secretAccessKey);
+    hasIAMRole = !!(process.env.ROLE_ARN || process.env.WEB_IDENTITY_TOKEN_FILE);
+    isLambda = !!(process.env.AWS_LAMBDA_FUNCTION_NAME);
+  } catch (error) {
+    console.error('Failed to load server configuration:', error);
+  }
+}
 
 console.log('AWS Services: Initialization check:', {
   hasAWSCredentials,
   hasIAMRole,
   isLambda,
-  region: awsConfig.region,
-  hasAccessKey: !!awsConfig.accessKeyId,
-  hasSecretKey: !!awsConfig.secretAccessKey,
-  awsRegion: process.env.AWS_REGION
+  region: serverAWSConfig?.region || 'NOT_CONFIGURED',
+  hasAccessKey: !!serverAWSConfig?.accessKeyId,
+  hasSecretKey: !!serverAWSConfig?.secretAccessKey,
+  awsRegion: process.env.AWS_REGION || 'NOT_CONFIGURED'
 });
 
 // Initialize DynamoDB client
 let client: DynamoDBClient | null = null;
 
-if (hasAWSCredentials) {
+if (hasAWSCredentials && serverAWSConfig) {
   console.log('AWS Services: Using access key credentials');
   // Use access keys
   client = new DynamoDBClient({
-    region: awsConfig.region,
+    region: serverAWSConfig.region,
     credentials: {
-      accessKeyId: awsConfig.accessKeyId!,
-      secretAccessKey: awsConfig.secretAccessKey!,
+      accessKeyId: serverAWSConfig.accessKeyId!,
+      secretAccessKey: serverAWSConfig.secretAccessKey!,
     },
   });
 } else if (hasIAMRole || isLambda) {
   console.log('AWS Services: Using IAM role/Lambda credentials');
   // Use IAM role (for AWS services like Lambda, EC2, etc.)
   client = new DynamoDBClient({
-    region: awsConfig.region,
+    region: serverAWSConfig?.region || 'us-west-1',
   });
 } else {
   console.warn('AWS Services: No AWS credentials found. DynamoDB operations will fail.');
@@ -42,11 +73,11 @@ if (hasAWSCredentials) {
 
 const docClient = client ? DynamoDBDocumentClient.from(client) : null;
 
-// Table names
+// Table names - use server configuration when available
 export const TABLES = {
-  ARTICLES: process.env.ARTICLES_TABLE || 'gwbn-articles',
-  USERS: process.env.USERS_TABLE || 'gwbn-users',
-  ANALYTICS: process.env.ANALYTICS_TABLE || 'gwbn-analytics',
+  ARTICLES: serverTableNames?.articles || 'gwbn-articles',
+  USERS: serverTableNames?.users || 'gwbn-users',
+  ANALYTICS: serverTableNames?.analytics || 'gwbn-analytics',
 } as const;
 
 // Article interface
