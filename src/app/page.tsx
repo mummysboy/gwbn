@@ -108,14 +108,7 @@ export default function Home() {
             </div>
             <div className="text-right">
               <div className="flex items-center justify-end gap-4 mb-2">
-                <button
-                  onClick={fetchArticles}
-                  disabled={isLoading}
-                  className="flex items-center gap-2 text-black hover:text-gray-600 transition-colors disabled:opacity-50"
-                >
-                  <ArrowPathIcon className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                  <span className="caption-text">Refresh</span>
-                </button>
+                
               </div>
               <p className="caption-text text-sm">
                 {new Date().toLocaleDateString('en-US', {
@@ -125,9 +118,7 @@ export default function Home() {
                   day: 'numeric'
                 })}
               </p>
-              <p className="caption-text text-xs">
-                Vol. 1, No. 1
-              </p>
+             
             </div>
           </div>
         </div>
@@ -139,9 +130,7 @@ export default function Home() {
         {featuredArticle && (
           <section className="mb-12">
             <div className="border-b-2 border-black pb-4 mb-6">
-              <span className="caption-text uppercase tracking-wider text-xs font-semibold">
-                Breaking News
-              </span>
+              
             </div>
             
             <article className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -166,7 +155,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="body-text text-lg leading-relaxed text-gray-800 mb-6">
-                  {featuredArticle.content}
+                  {featuredArticle.content.substring(0, 300)}...
                 </div>
                 <div className="flex items-center gap-4">
                   <button className="flex items-center gap-2 text-black hover:text-gray-600 transition-colors">

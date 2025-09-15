@@ -9,10 +9,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Golden West Business News - AI-Powered Publishing",
-  description: "Golden West Business News - AI-powered publishing platform for professional journalism",
-  keywords: ["news", "business", "journalism", "AI", "publishing", "mobile"],
+  title: "Golden West Business News",
+  description: "Golden West Business News - Your trusted source for business news, market insights, and industry analysis",
+  keywords: ["business news", "market analysis", "industry insights", "financial news", "business journalism"],
   authors: [{ name: "Golden West Business News" }],
+  icons: {
+    icon: "/Golden West Business News.png",
+    apple: "/Golden West Business News.png",
+  },
 };
 
 export const viewport = {
