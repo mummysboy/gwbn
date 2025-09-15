@@ -23,12 +23,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // Add output configuration for better deployment compatibility
-  output: 'standalone',
-  // Ensure proper handling of environment variables
-  env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
-  },
 };
 
 export default nextConfig;
