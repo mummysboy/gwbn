@@ -7,51 +7,14 @@ export async function POST(request: NextRequest) {
     
     // Check if OpenAI API key is configured
     if (!process.env.OPENAI_API_KEY) {
-      console.warn('OpenAI API key not configured, using enhanced fallback');
-      
-      const formData = await request.formData();
-      const audioFile = formData.get('audio') as File;
-      
-      if (!audioFile) {
-        return NextResponse.json(
-          { error: 'No audio file provided' },
-          { status: 400 }
-        );
-      }
-
-      // Enhanced fallback with realistic Santa Barbara content
-      const fallbackTranscripts = [
-        "Breaking news from downtown Santa Barbara today. Local officials announced a major infrastructure project that will begin next month. The project includes road improvements and new bike lanes throughout the city center.",
-        "In a surprising development, the Santa Barbara city council voted unanimously to approve funding for a new community center. The facility will provide services for families and seniors in the downtown area.",
-        "Weather update: Meteorologists are predicting heavy rainfall for the weekend. Santa Barbara residents are advised to prepare for potential flooding in low-lying areas near the coast.",
-        "Sports update: The Santa Barbara High School basketball team secured their spot in the state championships after a thrilling overtime victory last night at the Thunderdome.",
-        "Business news: A new tech startup has announced plans to hire 50 employees over the next six months, bringing new job opportunities to the Santa Barbara region.",
-        "Local restaurant news: A popular downtown eatery has expanded its outdoor seating area to accommodate more customers during the busy tourist season.",
-        "Community update: The Santa Barbara Public Library is hosting a series of free workshops on digital literacy for seniors starting next week.",
-        "Traffic alert: Construction on Highway 101 near downtown will cause delays during morning rush hour. Commuters are advised to use alternative routes."
-      ];
-      
-      // Select transcript based on audio file characteristics for variety
-      const audioSize = audioFile.size;
-      const transcriptIndex = audioSize % fallbackTranscripts.length;
-      const randomTranscript = fallbackTranscripts[transcriptIndex];
-      
-      console.log('Transcription API: Using fallback transcript', {
-        audioSize,
-        transcriptIndex,
-        transcriptLength: randomTranscript.length
-      });
-      
-      return NextResponse.json({ 
-        transcript: randomTranscript,
-        success: true, // Changed to true since this is a working solution
-        fallback: true,
-        service: 'enhanced-mock-fallback',
-        audioInfo: {
-          size: audioSize,
-          type: audioFile.type
-        }
-      });
+      console.error('OpenAI API key not configured');
+      return NextResponse.json(
+        { 
+          error: 'OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.',
+          success: false
+        },
+        { status: 500 }
+      );
     }
 
     // Initialize OpenAI client only when the function is called
