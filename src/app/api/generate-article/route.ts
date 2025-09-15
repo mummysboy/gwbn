@@ -41,7 +41,7 @@ async function generateArticleLocally(request: NextRequest) {
     }
 
     // Generate article using local AI logic instead of OpenAI
-    const articleData = generateArticleFromTranscript(transcript, notes || '');
+    const articleData = generateLocalArticle(transcript, notes || '');
 
     return NextResponse.json({ 
       success: false, // Mark as false to indicate fallback
@@ -81,4 +81,60 @@ For more information about local business opportunities and community developmen
       fallback: true
     });
   }
+}
+
+function generateLocalArticle(transcript: string, notes: string) {
+  // Simple local article generation logic
+  const words = transcript.toLowerCase().split(/\s+/);
+  
+  // Determine article type based on content
+  const businessKeywords = ['business', 'company', 'startup', 'entrepreneur', 'revenue', 'profit', 'market', 'industry'];
+  const communityKeywords = ['community', 'local', 'residents', 'city', 'council', 'public', 'service'];
+  const infrastructureKeywords = ['project', 'construction', 'development', 'infrastructure', 'building', 'facility'];
+  const sportsKeywords = ['team', 'game', 'championship', 'victory', 'sports', 'basketball', 'football'];
+  const weatherKeywords = ['weather', 'rain', 'storm', 'flood', 'meteorologist', 'forecast'];
+  
+  let articleType = 'general';
+  
+  if (businessKeywords.some(keyword => words.includes(keyword))) {
+    articleType = 'business';
+  } else if (communityKeywords.some(keyword => words.includes(keyword))) {
+    articleType = 'community';
+  } else if (infrastructureKeywords.some(keyword => words.includes(keyword))) {
+    articleType = 'infrastructure';
+  } else if (sportsKeywords.some(keyword => words.includes(keyword))) {
+    articleType = 'sports';
+  } else if (weatherKeywords.some(keyword => words.includes(keyword))) {
+    articleType = 'weather';
+  }
+  
+  // Generate title and content based on type
+  const titles = {
+    business: 'Local Business Expands Operations in Santa Barbara',
+    community: 'Community Center Receives Major Funding Boost',
+    infrastructure: 'Major Infrastructure Project Breaks Ground',
+    sports: 'Local Team Secures Championship Victory',
+    weather: 'Weather Alert: Residents Advised to Prepare',
+    general: 'Local Officials Announce Community Initiative'
+  };
+  
+  const title = titles[articleType as keyof typeof titles] || titles.general;
+  
+  const additionalContext = notes.trim() ? `\n\nAdditional Notes: ${notes}` : '';
+  
+  const content = `By Staff Reporter
+
+Local officials have announced important developments that will impact the Santa Barbara community. The initiative represents a significant step forward in addressing community needs and opportunities.
+
+The announcement comes after extensive planning and community input, reflecting the collaborative approach that has characterized local governance. Stakeholders have worked together to develop a comprehensive plan that addresses multiple community priorities.
+
+Community members have expressed enthusiasm about the potential benefits of the initiative, which include improved services and enhanced quality of life for residents. The program's scope and ambition have been particularly well-received.
+
+Local leaders have emphasized the importance of continued community engagement and collaboration in implementing the initiative successfully. Regular updates and opportunities for input will be provided throughout the process.
+
+The development represents a significant investment in the community's future and demonstrates the commitment of local leaders to improving the lives of Santa Barbara residents.
+
+This initiative highlights the continued growth and development of the Santa Barbara community, showcasing the area's potential and the dedication of its leaders to creating positive change.${additionalContext}`;
+  
+  return { title, content };
 }

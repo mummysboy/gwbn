@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOpenAIApiKey, getOpenAIClient } from '@/lib/openai-utils';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log('Testing Parameter Store integration...');
     
