@@ -129,7 +129,7 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
       formData.append('audio', audioBlob, 'recording.webm');
       
       // Send to our transcription API
-      const response = await fetch('/api/transcribe', {
+      const response = await fetch('/api/transcribe-direct', {
         method: 'POST',
         body: formData,
       });
