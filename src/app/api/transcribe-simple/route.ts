@@ -1,55 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
-import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
-
-// Cache for the OpenAI API key to avoid repeated calls to Secrets Manager
-let cachedApiKey: string | null = null;
-let lastFetchTime = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-async function getOpenAIApiKey(): Promise<string> {
-  // Return cached key if still valid
-  if (cachedApiKey && Date.now() - lastFetchTime < CACHE_DURATION) {
-    return cachedApiKey;
-  }
-
-  try {
-    console.log('Fetching OpenAI API key from AWS Secrets Manager');
-    
-    const secretsClient = new SecretsManagerClient({
-      region: 'us-west-1', // Default region
-    });
-
-    const command = new GetSecretValueCommand({
-      SecretId: 'gwbn-openai-api-key', // Secret name in AWS Secrets Manager
-    });
-
-    const response = await secretsClient.send(command);
-    
-    if (response.SecretString) {
-      const secretData = JSON.parse(response.SecretString);
-      cachedApiKey = secretData.apiKey;
-      lastFetchTime = Date.now();
-      
-      console.log('Successfully retrieved OpenAI API key from Secrets Manager');
-      return cachedApiKey!;
-    } else {
-      throw new Error('No secret string found in Secrets Manager response');
-    }
-  } catch (error) {
-    console.error('Failed to retrieve OpenAI API key from Secrets Manager:', error);
-    
-    // Fallback: try to get from environment variable (for local development)
-    if (process.env.OPENAI_API_KEY) {
-      console.log('Using OpenAI API key from environment variable (fallback)');
-      cachedApiKey = process.env.OPENAI_API_KEY;
-      lastFetchTime = Date.now();
-      return cachedApiKey;
-    }
-    
-    throw new Error('OpenAI API key not available in Secrets Manager or environment variables');
-  }
-}
+import { transcribeAudio } from '@/lib/openai-utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -71,44 +21,15 @@ export async function POST(request: NextRequest) {
       name: audioFile.name
     });
 
-    // Get OpenAI API key from AWS Secrets Manager (using IAM roles)
-    let apiKey: string;
-    
-    try {
-      apiKey = await getOpenAIApiKey();
-    } catch (error) {
-      console.warn('OpenAI API key not available, using fallback transcription');
-      return await getFallbackTranscription(audioFile);
-    }
-
-    // Initialize OpenAI client
-    const openai = new OpenAI({
-      apiKey: apiKey,
-    });
-
-    // Convert the audio file to a format OpenAI can process
-    const audioBuffer = await audioFile.arrayBuffer();
-    const audioBlob = new Blob([audioBuffer], { type: audioFile.type });
-    
-    // Create a File object for OpenAI API
-    const audioForOpenAI = new File([audioBlob], 'audio.webm', {
-      type: 'audio/webm'
-    });
-
-    // Transcribe the audio using OpenAI Whisper
-    const transcription = await openai.audio.transcriptions.create({
-      file: audioForOpenAI,
-      model: 'whisper-1',
-      language: 'en',
-      response_format: 'text'
-    });
+    // Use the new OpenAI utility function with Parameter Store integration
+    const transcription = await transcribeAudio(audioFile);
 
     console.log('OpenAI transcription completed successfully');
 
     return NextResponse.json({ 
       transcript: transcription,
       success: true,
-      service: 'openai-whisper-simple',
+      service: 'openai-whisper-parameter-store',
       audioInfo: {
         size: audioFile.size,
         type: audioFile.type,

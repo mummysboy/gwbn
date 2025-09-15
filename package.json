@@ -7,13 +7,15 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "setup-db": "node scripts/setup-dynamodb.js"
+    "setup-db": "node scripts/setup-dynamodb.js",
+    "setup-openai": "node scripts/setup-openai-parameter.js"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.888.0",
     "@aws-sdk/client-polly": "^3.888.0",
     "@aws-sdk/client-s3": "^3.888.0",
     "@aws-sdk/client-secrets-manager": "^3.888.0",
+    "@aws-sdk/client-ssm": "^3.888.0",
     "@aws-sdk/client-transcribe": "^3.888.0",
     "@aws-sdk/lib-dynamodb": "^3.888.0",
     "@heroicons/react": "^2.2.0",

@@ -21,10 +21,11 @@
 		{
 			"Effect": "Allow",
 			"Action": [
-				"secretsmanager:GetSecretValue"
+				"ssm:GetParameter",
+				"ssm:GetParameters"
 			],
 			"Resource": [
-				"arn:aws:secretsmanager:us-west-1:*:secret:OPENAI_API_KEY*"
+				"arn:aws:ssm:us-west-1:*:parameter/gwbn/openai/api-key"
 			]
 		},
 		{

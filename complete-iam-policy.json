@@ -42,15 +42,16 @@
 			]
 		},
 		{
-			"Sid": "SecretsManagerAccess",
+			"Sid": "ParameterStoreAccess",
 			"Effect": "Allow",
 			"Action": [
-				"secretsmanager:GetSecretValue",
-				"secretsmanager:DescribeSecret"
+				"ssm:GetParameter",
+				"ssm:GetParameters",
+				"ssm:GetParametersByPath"
 			],
 			"Resource": [
-				"arn:aws:secretsmanager:us-west-1:*:secret:OPENAI_API_KEY*",
-				"arn:aws:secretsmanager:us-west-1:*:secret:gwbn-*"
+				"arn:aws:ssm:us-west-1:*:parameter/gwbn/openai/api-key",
+				"arn:aws:ssm:us-west-1:*:parameter/gwbn/*"
 			]
 		},
 		{
