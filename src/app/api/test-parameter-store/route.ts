@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getOpenAIApiKey, getOpenAIClient } from '@/lib/openai-utils';
 
 export async function GET() {
@@ -12,17 +12,17 @@ export async function GET() {
       tests: {
         parameterStore: {
           success: false,
-          error: null,
+          error: null as string | null,
           details: {}
         },
         openaiClient: {
           success: false,
-          error: null,
+          error: null as string | null,
           details: {}
         },
         openaiTest: {
           success: false,
-          error: null,
+          error: null as string | null,
           details: {}
         }
       }
