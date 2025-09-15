@@ -128,13 +128,27 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
       
-      // Send to our transcription API
-      console.log('Making POST request to /api/transcribe-direct');
-      const response = await fetch('/api/transcribe-direct', {
+      // Try the simple endpoint first (no AWS Secrets Manager required)
+      console.log('Making POST request to /api/transcribe-simple');
+      let response = await fetch('/api/transcribe-simple', {
         method: 'POST',
         body: formData,
       });
+      
+      // If simple endpoint fails, try the direct endpoint
+      if (!response.ok) {
+        console.log('Simple endpoint failed, trying /api/transcribe-direct');
+        response = await fetch('/api/transcribe-direct', {
+          method: 'POST',
+          body: formData,
+        });
+      }
+      
       console.log('Response received:', response.status, response.statusText);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       
       const result = await response.json();
       

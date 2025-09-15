@@ -17,7 +17,7 @@ async function getOpenAIApiKey(): Promise<string> {
     console.log('Fetching OpenAI API key from AWS Secrets Manager');
     
     const secretsClient = new SecretsManagerClient({
-      region: process.env.AWS_REGION || 'us-west-1',
+      region: process.env.AWS_REGION || 'us-east-1',
     });
 
     const command = new GetSecretValueCommand({
@@ -55,8 +55,16 @@ export async function POST(request: NextRequest) {
   try {
     console.log('Direct Transcription API: Starting request');
     
-    // Get OpenAI API key
-    const apiKey = await getOpenAIApiKey();
+    // Get OpenAI API key - try environment variable first, then AWS Secrets Manager
+    let apiKey: string;
+    
+    if (process.env.OPENAI_API_KEY) {
+      console.log('Using OpenAI API key from environment variable');
+      apiKey = process.env.OPENAI_API_KEY;
+    } else {
+      console.log('No environment variable found, attempting to fetch from AWS Secrets Manager');
+      apiKey = await getOpenAIApiKey();
+    }
     
     // Initialize OpenAI client
     const openai = new OpenAI({

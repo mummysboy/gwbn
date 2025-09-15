@@ -1,0 +1,31 @@
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": [
+				"dynamodb:GetItem",
+				"dynamodb:PutItem",
+				"dynamodb:UpdateItem",
+				"dynamodb:DeleteItem",
+				"dynamodb:Scan",
+				"dynamodb:Query",
+				"dynamodb:DescribeTable"
+			],
+			"Resource": [
+				"arn:aws:dynamodb:us-west-1:*:table/gwbn-articles",
+				"arn:aws:dynamodb:us-west-1:*:table/gwbn-users",
+				"arn:aws:dynamodb:us-west-1:*:table/gwbn-analytics"
+			]
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"secretsmanager:GetSecretValue"
+			],
+			"Resource": [
+				"arn:aws:secretsmanager:us-west-1:*:secret:gwbn-openai-api-key*"
+			]
+		}
+	]
+}
