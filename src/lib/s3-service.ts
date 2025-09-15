@@ -131,9 +131,28 @@ export class S3Service {
 
     } catch (error) {
       console.error('S3 Service: Upload failed:', error);
+      
+      let errorMessage = 'Unknown error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Provide more specific error messages
+        if (error.message.includes('NoSuchBucket')) {
+          errorMessage = `S3 bucket '${serverS3Config.bucketName}' does not exist. Please create the bucket or check the bucket name.`;
+        } else if (error.message.includes('AccessDenied')) {
+          errorMessage = 'Access denied. Please check your AWS credentials and S3 permissions.';
+        } else if (error.message.includes('InvalidAccessKeyId')) {
+          errorMessage = 'Invalid AWS access key. Please check your ACCESS_KEY_ID environment variable.';
+        } else if (error.message.includes('SignatureDoesNotMatch')) {
+          errorMessage = 'Invalid AWS secret key. Please check your SECRET_ACCESS_KEY environment variable.';
+        } else if (error.message.includes('TokenRefreshRequired')) {
+          errorMessage = 'AWS credentials expired. Please refresh your credentials.';
+        }
+      }
+      
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: errorMessage
       };
     }
   }
@@ -190,12 +209,21 @@ export class S3Service {
    * Check if S3 is properly configured
    */
   static isConfigured(): boolean {
-    return !!(
-      s3Client && 
-      serverS3Config?.bucketName && 
+    const hasClient = !!s3Client;
+    const hasBucketName = !!(serverS3Config?.bucketName && 
       serverS3Config.bucketName !== 'your_bucket_name' &&
-      serverS3Config.bucketName.length > 0
-    );
+      serverS3Config.bucketName.length > 0);
+    
+    console.log('S3 Service: Configuration check:', {
+      hasClient,
+      hasBucketName,
+      bucketName: serverS3Config?.bucketName,
+      hasAWSCredentials,
+      hasIAMRole,
+      isLambda
+    });
+    
+    return hasClient && hasBucketName;
   }
 
   /**
