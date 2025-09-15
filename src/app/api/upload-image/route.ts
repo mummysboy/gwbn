@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { S3Service, UploadResult } from '@/lib/s3-service';
-import { LocalStorageService, LocalUploadResult } from '@/lib/local-storage-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,76 +29,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Log environment info for debugging
-    const s3ConfigStatus = S3Service.getConfigStatus();
-    console.log('Upload API: Environment check:', {
-      isConfigured: S3Service.isConfigured(),
-      configStatus: s3ConfigStatus,
-      hasAccessKey: !!process.env.ACCESS_KEY_ID,
-      hasSecretKey: !!process.env.SECRET_ACCESS_KEY,
-      bucketName: 'gwbn-storage (hardcoded)',
-      region: 'us-west-1 (hardcoded)',
-      platform: process.env.VERCEL ? 'Vercel' : process.env.AMPLIFY_APP_ID ? 'Amplify' : 'Unknown'
-    });
+    console.log('Upload API: Processing image upload (no external dependencies)');
 
-    // Try S3 first, fallback to local storage
-    let result: UploadResult | LocalUploadResult;
+    // Convert file to base64 for storage
+    const buffer = await file.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString('base64');
     
-    if (S3Service.isConfigured()) {
-      console.log('Upload API: Attempting S3 upload');
-      result = await S3Service.uploadImage(file, folder);
-      
-      if (!result.success) {
-        console.error('S3 upload failed:', result.error);
-        console.log('Upload API: Falling back to local storage due to S3 failure');
-        result = await LocalStorageService.uploadImage(file, folder);
-      }
-    } else {
-      console.log('Upload API: S3 not configured, using local storage');
-      console.log('Upload API: S3 configuration issues:', {
-        hasClient: s3ConfigStatus.hasClient,
-        bucketName: s3ConfigStatus.bucketName,
-        region: s3ConfigStatus.region,
-        hasAWSCredentials: s3ConfigStatus.hasAWSCredentials,
-        hasIAMRole: s3ConfigStatus.hasIAMRole,
-        isLambda: s3ConfigStatus.isLambda
-      });
-      result = await LocalStorageService.uploadImage(file, folder);
-    }
+    // Generate unique filename
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 15);
+    const fileExtension = file.name.split('.').pop() || 'jpg';
+    const fileName = `${timestamp}_${randomString}.${fileExtension}`;
+    
+    // Create a data URL for the image
+    const dataUrl = `data:${file.type};base64,${base64}`;
+    
+    // For now, we'll return the data URL directly
+    // In a real implementation, you might want to store this in a database
+    const url = dataUrl;
 
-    if (result.success) {
-      const key = 'key' in result ? result.key : ('filename' in result ? result.filename : undefined);
-      return NextResponse.json({
-        success: true,
-        url: result.url,
-        key,
-        storageType: 'key' in result ? 's3' : 'local'
-      });
-    } else {
-      return NextResponse.json(
-        { 
-          error: result.error || 'Upload failed',
-          debug: {
-            s3Configured: S3Service.isConfigured(),
-            s3ConfigStatus,
-            environment: process.env.NODE_ENV,
-            platform: process.env.VERCEL ? 'Vercel' : process.env.AMPLIFY_APP_ID ? 'Amplify' : 'Unknown'
-          }
-        },
-        { status: 500 }
-      );
-    }
+    console.log('Upload API: Successfully processed image:', { fileName, size: file.size });
+
+    return NextResponse.json({
+      success: true,
+      url: url,
+      filename: fileName,
+      storageType: 'base64'
+    });
 
   } catch (error) {
     console.error('Image upload error:', error);
     return NextResponse.json(
       { 
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        debug: {
-          s3Configured: S3Service.isConfigured(),
-          s3ConfigStatus: S3Service.getConfigStatus()
-        }
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );
