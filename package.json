@@ -6,9 +6,13 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "setup-db": "node scripts/setup-dynamodb.js"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.888.0",
+    "@aws-sdk/client-transcribe": "^3.888.0",
+    "@aws-sdk/lib-dynamodb": "^3.888.0",
     "@heroicons/react": "^2.2.0",
     "@types/dom-speech-recognition": "^0.0.6",
     "clsx": "^2.1.1",

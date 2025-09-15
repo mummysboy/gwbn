@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { awsConfig } from '@/lib/aws-config';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +21,8 @@ export async function POST(request: NextRequest) {
         transcript: randomTranscript,
         success: false,
         error: 'OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.',
-        fallback: true
+        fallback: true,
+        service: 'mock-fallback'
       });
     }
 
@@ -57,7 +59,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       transcript: transcription,
-      success: true 
+      success: true,
+      service: 'openai-whisper'
     });
 
   } catch (error) {
@@ -78,7 +81,8 @@ export async function POST(request: NextRequest) {
       transcript: randomTranscript,
       success: false,
       error: 'OpenAI transcription failed, using fallback',
-      fallback: true
+      fallback: true,
+      service: 'mock-fallback'
     });
   }
 }

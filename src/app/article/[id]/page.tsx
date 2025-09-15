@@ -30,6 +30,86 @@ interface Article {
   readTime?: number;
 }
 
+interface ArticleContentWithPhotosProps {
+  content: string;
+  images: string[];
+  title: string;
+  author?: string;
+}
+
+function ArticleContentWithPhotos({ content, images, title, author }: ArticleContentWithPhotosProps) {
+  // Parse content into paragraphs
+  const paragraphs = content.split('\n').filter(p => p.trim().length > 0);
+  
+  // Create photo placement array
+  const contentWithPhotos: (string | { type: 'photo'; src: string; alt: string; index: number })[] = [];
+  let photoIndex = 0;
+  
+  // Add thumbnail photo at the beginning
+  if (images.length > 0) {
+    contentWithPhotos.push({
+      type: 'photo',
+      src: images[0],
+      alt: `${title} - Thumbnail`,
+      index: 0
+    });
+    photoIndex = 1;
+  }
+  
+  // Process paragraphs and insert photos every 3 paragraphs
+  paragraphs.forEach((paragraph, index) => {
+    contentWithPhotos.push(paragraph);
+    
+    // Insert photo after every 3 paragraphs (but not after the last paragraph)
+    if ((index + 1) % 3 === 0 && index < paragraphs.length - 1 && photoIndex < images.length) {
+      contentWithPhotos.push({
+        type: 'photo',
+        src: images[photoIndex],
+        alt: `${title} - Image ${photoIndex + 1}`,
+        index: photoIndex
+      });
+      photoIndex++;
+    }
+  });
+  
+  return (
+    <div className="body-text text-lg leading-relaxed text-black font-serif">
+      {contentWithPhotos.map((item, index) => {
+        if (typeof item === 'string') {
+          // Render paragraph
+          const isFirstParagraph = index === 0 || (index === 1 && contentWithPhotos[0].type === 'photo');
+          return (
+            <p 
+              key={index} 
+              className={`mb-4 ${isFirstParagraph ? 'first-letter:text-6xl first-letter:font-bold first-letter:text-black first-letter:mr-1 first-letter:float-left first-letter:leading-none' : ''}`}
+            >
+              {item}
+            </p>
+          );
+        } else {
+          // Render photo at the top of the content
+          const isThumbnail = item.index === 0;
+          const borderClass = isThumbnail ? 'border-2 border-black' : 'border border-gray-400';
+          
+          return (
+            <div key={index} className="w-full mb-6">
+              <div className={`${borderClass} max-w-md mx-auto`}>
+                <Image
+                  src={item.src}
+                  alt={item.alt}
+                  width={400}
+                  height={isThumbnail ? 500 : 300}
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+          );
+        }
+      })}
+    </div>
+  );
+}
+
 export default function ArticlePage() {
   const params = useParams();
   const router = useRouter();
@@ -58,7 +138,12 @@ export default function ArticlePage() {
     // Fetch articles from API
     const fetchArticles = async () => {
       try {
-        const response = await fetch('/api/articles?status=published');
+        const response = await fetch('/api/articles?status=published', {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
         const data = await response.json();
         
         if (data.success && data.articles) {
@@ -280,30 +365,22 @@ export default function ArticlePage() {
             </div>
           </div>
 
-          {/* Featured Image */}
-          {article.images && article.images.length > 0 && (
-            <div className="mb-8">
-              <div className="bg-gray-100 aspect-[16/9] mb-4 rounded-lg overflow-hidden">
-                <Image
-                  src={article.images[0]}
-                  alt={article.title}
-                  width={800}
-                  height={450}
-                  className="w-full h-full object-cover"
-                  priority
-                />
-              </div>
-              <p className="caption-text text-xs text-gray-600">
-                Photo: {article.author} / Golden West Business News
-              </p>
-            </div>
-          )}
-
-          {/* Article Body */}
+          {/* Article Body with Inline Photos - Newspaper Style */}
           <div className="prose prose-lg max-w-none">
-            <div className="body-text text-lg leading-relaxed text-gray-800 whitespace-pre-line">
-              {article.content}
-            </div>
+            {article.images && article.images.length > 0 ? (
+              <ArticleContentWithPhotos 
+                content={article.content} 
+                images={article.images} 
+                title={article.title}
+                author={article.author}
+              />
+            ) : (
+              <div className="body-text text-lg leading-relaxed text-black whitespace-pre-line font-serif">
+                <div className="first-letter:text-6xl first-letter:font-bold first-letter:text-black first-letter:mr-1 first-letter:float-left first-letter:leading-none">
+                  {article.content}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Article Footer */}

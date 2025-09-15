@@ -7,6 +7,7 @@ import {
   EyeIcon,
   ShareIcon,
   CalendarIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -26,38 +27,58 @@ interface Article {
 export default function Home() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [featuredArticle, setFeaturedArticle] = useState<Article | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Fetch published articles from API
-    const fetchArticles = async () => {
-      try {
-        const response = await fetch('/api/articles?status=published');
-        const data = await response.json();
-        
-        if (data.success && data.articles) {
-          // Convert date strings back to Date objects
-          const articlesWithDates = data.articles.map((article: Article) => ({
-            ...article,
-            createdAt: new Date(article.createdAt)
-          }));
-          
-          setArticles(articlesWithDates);
-          setFeaturedArticle(articlesWithDates[0] || null);
-        } else {
-          console.error('Failed to fetch articles:', data.error);
-          // Fallback to empty state
-          setArticles([]);
-          setFeaturedArticle(null);
+  const fetchArticles = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/articles?status=published', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
         }
-      } catch (error) {
-        console.error('Error fetching articles:', error);
+      });
+      const data = await response.json();
+      
+      if (data.success && data.articles) {
+        // Convert date strings back to Date objects
+        const articlesWithDates = data.articles.map((article: Article) => ({
+          ...article,
+          createdAt: new Date(article.createdAt)
+        }));
+        
+        setArticles(articlesWithDates);
+        setFeaturedArticle(articlesWithDates[0] || null);
+      } else {
+        console.error('Failed to fetch articles:', data.error);
         // Fallback to empty state
         setArticles([]);
         setFeaturedArticle(null);
       }
-    };
-    
+    } catch (error) {
+      console.error('Error fetching articles:', error);
+      // Fallback to empty state
+      setArticles([]);
+      setFeaturedArticle(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchArticles();
+  }, []);
+
+  // Refresh data when page becomes visible again
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchArticles();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
 
@@ -86,6 +107,16 @@ export default function Home() {
               </p>
             </div>
             <div className="text-right">
+              <div className="flex items-center justify-end gap-4 mb-2">
+                <button
+                  onClick={fetchArticles}
+                  disabled={isLoading}
+                  className="flex items-center gap-2 text-black hover:text-gray-600 transition-colors disabled:opacity-50"
+                >
+                  <ArrowPathIcon className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                  <span className="caption-text">Refresh</span>
+                </button>
+              </div>
               <p className="caption-text text-sm">
                 {new Date().toLocaleDateString('en-US', {
                   weekday: 'long',
@@ -150,18 +181,18 @@ export default function Home() {
               </div>
               
               <div className="lg:col-span-1">
-                <div className="bg-gray-100 aspect-[4/3] mb-4">
-                  <Image
-                    src={featuredArticle.images[0]}
-                    alt={featuredArticle.title}
-                    width={400}
-                    height={300}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <p className="caption-text text-xs">
-                  Photo: {featuredArticle.author} / Golden West Business News
-                </p>
+                {/* Newspaper-style main photo - only show 1 photo as thumbnail */}
+                {featuredArticle.images.length > 0 && (
+                  <div className="border-2 border-black mb-4">
+                    <Image
+                      src={featuredArticle.images[0]}
+                      alt={featuredArticle.title}
+                      width={400}
+                      height={500}
+                      className="w-full h-auto"
+                    />
+                  </div>
+                )}
               </div>
             </article>
           </section>
@@ -204,15 +235,18 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="md:col-span-1">
-                      <div className="bg-gray-100 aspect-[4/3]">
-                        <Image
-                          src={article.images[0]}
-                          alt={article.title}
-                          width={200}
-                          height={150}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+                      {/* Newspaper-style main photo - only show 1 photo as thumbnail */}
+                      {article.images.length > 0 && (
+                        <div className="border-2 border-black mb-2">
+                          <Image
+                            src={article.images[0]}
+                            alt={article.title}
+                            width={200}
+                            height={250}
+                            className="w-full h-auto"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </article>

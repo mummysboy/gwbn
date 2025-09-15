@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   UsersIcon, 
   PlusIcon, 
@@ -11,52 +11,51 @@ import {
 import Container from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'editor' | 'reporter';
+  status: 'active' | 'inactive';
+  lastLogin?: string;
+  avatar?: string;
+  createdAt: string;
+}
+
 export default function UsersPage() {
-  // Mock user data
-  const users = [
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      role: 'Admin',
-      status: 'Active',
-      lastLogin: '2 hours ago',
-      avatar: 'JD',
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      email: 'jane.smith@example.com',
-      role: 'User',
-      status: 'Active',
-      lastLogin: '1 day ago',
-      avatar: 'JS',
-    },
-    {
-      id: 3,
-      name: 'Bob Johnson',
-      email: 'bob.johnson@example.com',
-      role: 'Moderator',
-      status: 'Inactive',
-      lastLogin: '1 week ago',
-      avatar: 'BJ',
-    },
-    {
-      id: 4,
-      name: 'Alice Brown',
-      email: 'alice.brown@example.com',
-      role: 'User',
-      status: 'Active',
-      lastLogin: '3 hours ago',
-      avatar: 'AB',
-    },
-  ];
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/users');
+        const data = await response.json();
+        
+        if (data.success && data.users) {
+          setUsers(data.users);
+        } else {
+          console.error('Failed to fetch users:', data.error);
+          setUsers([]);
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        setUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUsers();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Active':
+      case 'active':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'Inactive':
+      case 'inactive':
         return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
@@ -65,16 +64,45 @@ export default function UsersPage() {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'Admin':
+      case 'admin':
         return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
-      case 'Moderator':
+      case 'editor':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'User':
+      case 'reporter':
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
     }
   };
+
+  const formatRole = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'Admin';
+      case 'editor':
+        return 'Editor';
+      case 'reporter':
+        return 'Reporter';
+      default:
+        return role;
+    }
+  };
+
+  const formatStatus = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'Active';
+      case 'inactive':
+        return 'Inactive';
+      default:
+        return status;
+    }
+  };
+
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="py-6">
@@ -149,12 +177,12 @@ export default function UsersPage() {
           
           {/* Mobile Cards View */}
           <div className="block sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <div key={user.id} className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-medium text-sm">
-                      {user.avatar}
+                      {user.avatar || user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
@@ -168,10 +196,10 @@ export default function UsersPage() {
                 <div className="mt-3 flex items-center justify-between">
                   <div className="flex gap-2">
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
-                      {user.role}
+                      {formatRole(user.role)}
                     </span>
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-                      {user.status}
+                      {formatStatus(user.status)}
                     </span>
                   </div>
                   <span className="text-xs text-gray-500 dark:text-gray-400">{user.lastLogin}</span>
@@ -203,12 +231,12 @@ export default function UsersPage() {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-medium text-sm">
-                          {user.avatar}
+                          {user.avatar || user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -222,12 +250,12 @@ export default function UsersPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
-                        {user.role}
+                        {formatRole(user.role)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-                        {user.status}
+                        {formatStatus(user.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">

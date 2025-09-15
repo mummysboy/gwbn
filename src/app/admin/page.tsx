@@ -46,98 +46,111 @@ export default function AdminDashboard() {
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [activeTab, setActiveTab] = useState<'publish' | 'dashboard'>('publish');
   const [notes, setNotes] = useState('');
+  const [analyticsData, setAnalyticsData] = useState<{
+    totalArticles: number;
+    publishedArticles: number;
+    draftArticles: number;
+    totalViews: number;
+    recentActivities: Array<{
+      id: number;
+      type: string;
+      message: string;
+      time: string;
+      icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+    }>;
+    stats?: {
+      totalArticles: number;
+      publishedArticles: number;
+      draftArticles: number;
+      totalViews: number;
+      publishedToday: number;
+      systemHealth: number;
+    };
+  } | null>(null);
 
-  // Fetch articles from API
+  // Fetch articles and analytics from API
   useEffect(() => {
-    const fetchArticles = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/articles');
-        const data = await response.json();
         
-        if (data.success && data.articles) {
+        // Fetch articles and analytics in parallel
+        const [articlesResponse, analyticsResponse] = await Promise.all([
+          fetch('/api/articles?status=published'),
+          fetch('/api/analytics?type=dashboard')
+        ]);
+        
+        const articlesData = await articlesResponse.json();
+        const analyticsData = await analyticsResponse.json();
+        
+        if (articlesData.success && articlesData.articles) {
           // Convert date strings back to Date objects
-          const articlesWithDates = data.articles.map((article: Article) => ({
+          const articlesWithDates = articlesData.articles.map((article: Article) => ({
             ...article,
             createdAt: new Date(article.createdAt)
           }));
           
           setArticles(articlesWithDates);
         } else {
-          console.error('Failed to fetch articles:', data.error);
+          console.error('Failed to fetch articles:', articlesData.error);
           setArticles([]);
         }
+        
+        // Store analytics data for use in stats
+        if (analyticsData.success) {
+          setAnalyticsData(analyticsData);
+        }
+        
       } catch (error) {
-        console.error('Error fetching articles:', error);
+        console.error('Error fetching data:', error);
         setArticles([]);
       } finally {
         setLoading(false);
       }
     };
     
-    fetchArticles();
+    fetchData();
   }, []);
 
-  // Mock data for dashboard
+  // Real data for dashboard
   const stats = [
     {
       name: 'Total Articles',
-      value: articles.length.toString(),
+      value: analyticsData?.stats?.totalArticles?.toString() || articles.length.toString(),
       change: '+2',
       changeType: 'positive',
       icon: DocumentTextIcon,
     },
     {
       name: 'Published Today',
-      value: '1',
+      value: analyticsData?.stats?.publishedToday?.toString() || '0',
       change: '+100%',
       changeType: 'positive',
       icon: ChartBarIcon,
     },
     {
       name: 'Total Views',
-      value: '2,345',
+      value: analyticsData?.stats?.totalViews?.toLocaleString() || '0',
       change: '+12%',
       changeType: 'positive',
       icon: UsersIcon,
     },
     {
       name: 'System Health',
-      value: '99.9%',
+      value: `${analyticsData?.stats?.systemHealth || 99.9}%`,
       change: '+0.1%',
       changeType: 'positive',
       icon: CheckCircleIcon,
     },
   ];
 
-  const recentActivities = [
+  const recentActivities = analyticsData?.recentActivities || [
     {
       id: 1,
       type: 'article_published',
-      message: 'New article published: "Local Tech Startup Raises $2M"',
-      time: '2 minutes ago',
+      message: 'No recent activity',
+      time: 'N/A',
       icon: DocumentTextIcon,
-    },
-    {
-      id: 2,
-      type: 'system_alert',
-      message: 'AI enhancement service running smoothly',
-      time: '5 minutes ago',
-      icon: CheckCircleIcon,
-    },
-    {
-      id: 3,
-      type: 'article_edited',
-      message: 'Article "City Council Approves New Park" was updated',
-      time: '10 minutes ago',
-      icon: PencilIcon,
-    },
-    {
-      id: 4,
-      type: 'maintenance',
-      message: 'Voice recording service maintenance completed',
-      time: '1 hour ago',
-      icon: CogIcon,
     },
   ];
 
@@ -216,8 +229,25 @@ export default function AdminDashboard() {
     }
   };
 
-  const deleteArticle = (id: string) => {
-    setArticles(prev => prev.filter(article => article.id !== id));
+  const deleteArticle = async (id: string) => {
+    try {
+      const response = await fetch(`/api/articles/${id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Remove from local state only after successful API deletion
+        setArticles(prev => prev.filter(article => article.id !== id));
+        alert('Article deleted successfully!');
+      } else {
+        alert('Failed to delete article: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error deleting article:', error);
+      alert('Failed to delete article. Please try again.');
+    }
   };
 
   const editArticle = (article: Article) => {
