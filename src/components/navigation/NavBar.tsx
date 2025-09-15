@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { 
   Bars3Icon, 
@@ -34,8 +35,14 @@ export default function NavBar() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-12">
           {/* Logo */}
-          <Link href="/" className="headline-serif text-xl font-bold text-black">
-            GWBN
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/Golden West Business News.png"
+              alt="Golden West Business News"
+              width={120}
+              height={48}
+              className="h-8 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}

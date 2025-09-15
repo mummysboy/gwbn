@@ -75,7 +75,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
               {/* Footer */}
               <div className="p-4 border-t border-gray-200 dark:border-gray-700">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  GWBN Mobile App
+                  Golden West Business News Mobile App
                 </p>
               </div>
             </div>

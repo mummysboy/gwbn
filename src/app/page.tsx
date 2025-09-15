@@ -98,12 +98,16 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="text-center">
-              <h1 className="headline-serif text-4xl md:text-5xl font-bold text-black mb-2">
-                GWBN
-              </h1>
-              <p className="caption-text text-xs uppercase tracking-wider">
-                Golden West Business News
-              </p>
+              <div className="mb-2">
+                <Image
+                  src="/Golden West Business News.png"
+                  alt="Golden West Business News"
+                  width={200}
+                  height={80}
+                  className="mx-auto h-16 md:h-20 w-auto"
+                  priority
+                />
+              </div>
             </div>
             <div className="text-right">
               <div className="flex items-center justify-end gap-4 mb-2">
