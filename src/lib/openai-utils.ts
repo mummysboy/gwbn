@@ -231,26 +231,31 @@ CRITICAL REQUIREMENTS:
  * Transcribes audio using OpenAI Whisper
  */
 export async function transcribeAudio(audioFile: File): Promise<string> {
-  const openai = await getOpenAIClient();
+  try {
+    const openai = await getOpenAIClient();
 
-  // Convert the audio file to a format OpenAI can process
-  const audioBuffer = await audioFile.arrayBuffer();
-  const audioBlob = new Blob([audioBuffer], { type: audioFile.type });
-  
-  // Create a File object for OpenAI API
-  const audioForOpenAI = new File([audioBlob], 'audio.webm', {
-    type: 'audio/webm'
-  });
+    // Convert the audio file to a format OpenAI can process
+    const audioBuffer = await audioFile.arrayBuffer();
+    const audioBlob = new Blob([audioBuffer], { type: audioFile.type });
+    
+    // Create a File object for OpenAI API
+    const audioForOpenAI = new File([audioBlob], 'audio.webm', {
+      type: 'audio/webm'
+    });
 
-  // Transcribe the audio using OpenAI Whisper
-  const transcription = await openai.audio.transcriptions.create({
-    file: audioForOpenAI,
-    model: 'whisper-1',
-    language: 'en',
-    response_format: 'text'
-  });
+    // Transcribe the audio using OpenAI Whisper
+    const transcription = await openai.audio.transcriptions.create({
+      file: audioForOpenAI,
+      model: 'whisper-1',
+      language: 'en',
+      response_format: 'text'
+    });
 
-  return transcription;
+    return transcription;
+  } catch (error) {
+    console.error('OpenAI transcription failed:', error);
+    throw error; // Re-throw to be handled by the calling function
+  }
 }
 
 /**

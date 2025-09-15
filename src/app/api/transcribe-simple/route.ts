@@ -21,25 +21,32 @@ export async function POST(request: NextRequest) {
       name: audioFile.name
     });
 
-    // Try to use OpenAI utility function with Parameter Store integration
-    try {
-      const transcription = await transcribeAudio(audioFile);
-      
-      console.log('OpenAI transcription completed successfully');
+    // Check if we're in a local development environment or if Parameter Store is not configured
+    const isLocalDev = process.env.NODE_ENV === 'development' || !process.env.AWS_REGION;
+    
+    if (!isLocalDev) {
+      // Try to use OpenAI utility function with Parameter Store integration
+      try {
+        const transcription = await transcribeAudio(audioFile);
+        
+        console.log('OpenAI transcription completed successfully');
 
-      return NextResponse.json({ 
-        transcript: transcription,
-        success: true,
-        service: 'openai-whisper-parameter-store',
-        audioInfo: {
-          size: audioFile.size,
-          type: audioFile.type,
-          name: audioFile.name
-        }
-      });
-    } catch (openaiError) {
-      console.warn('OpenAI transcription failed, using fallback:', openaiError);
-      // Fall through to fallback transcription
+        return NextResponse.json({ 
+          transcript: transcription,
+          success: true,
+          service: 'openai-whisper-parameter-store',
+          audioInfo: {
+            size: audioFile.size,
+            type: audioFile.type,
+            name: audioFile.name
+          }
+        });
+      } catch (openaiError) {
+        console.warn('OpenAI transcription failed, using fallback:', openaiError);
+        // Fall through to fallback transcription
+      }
+    } else {
+      console.log('Local development environment detected, using fallback transcription');
     }
 
     // Use fallback transcription if OpenAI fails
