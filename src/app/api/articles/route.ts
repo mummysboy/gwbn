@@ -4,10 +4,22 @@ import { ArticleService } from '@/lib/aws-services';
 // GET /api/articles - Get all published articles
 export async function GET(request: NextRequest) {
   try {
+    console.log('Articles API: Starting request');
+    
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') as 'draft' | 'published' | undefined;
     
+    console.log('Articles API: Status filter:', status);
+    console.log('Articles API: Environment check:', {
+      REGION: process.env.REGION,
+      HAS_ACCESS_KEY: !!process.env.ACCESS_KEY_ID,
+      HAS_SECRET_KEY: !!process.env.SECRET_ACCESS_KEY,
+      ARTICLES_TABLE: process.env.ARTICLES_TABLE || 'gwbn-articles'
+    });
+    
     const articles = await ArticleService.getArticles(status);
+    
+    console.log('Articles API: Successfully fetched', articles.length, 'articles');
     
     return NextResponse.json({
       success: true,
@@ -22,9 +34,19 @@ export async function GET(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('Error fetching articles:', error);
+    console.error('Articles API: Detailed error:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+      error: error
+    });
+    
     return NextResponse.json(
-      { error: 'Failed to fetch articles' },
+      { 
+        error: 'Failed to fetch articles',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     );
   }

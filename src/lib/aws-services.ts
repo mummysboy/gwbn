@@ -6,10 +6,19 @@ import { awsConfig } from './aws-config';
 const hasAWSCredentials = awsConfig.accessKeyId && awsConfig.secretAccessKey;
 const hasIAMRole = !!(process.env.ROLE_ARN || process.env.WEB_IDENTITY_TOKEN_FILE);
 
+console.log('AWS Services: Initialization check:', {
+  hasAWSCredentials,
+  hasIAMRole,
+  region: awsConfig.region,
+  hasAccessKey: !!awsConfig.accessKeyId,
+  hasSecretKey: !!awsConfig.secretAccessKey
+});
+
 // Initialize DynamoDB client
 let client: DynamoDBClient | null = null;
 
 if (hasAWSCredentials) {
+  console.log('AWS Services: Using access key credentials');
   // Use access keys
   client = new DynamoDBClient({
     region: awsConfig.region,
@@ -19,12 +28,13 @@ if (hasAWSCredentials) {
     },
   });
 } else if (hasIAMRole) {
+  console.log('AWS Services: Using IAM role credentials');
   // Use IAM role (for AWS services like Lambda, EC2, etc.)
   client = new DynamoDBClient({
     region: awsConfig.region,
   });
 } else {
-  console.warn('No AWS credentials found. DynamoDB operations will fail.');
+  console.warn('AWS Services: No AWS credentials found. DynamoDB operations will fail.');
 }
 
 const docClient = client ? DynamoDBDocumentClient.from(client) : null;
@@ -113,7 +123,10 @@ export class ArticleService {
   }
 
   static async getArticles(status?: 'draft' | 'published'): Promise<Article[]> {
+    console.log('ArticleService.getArticles: Starting with status:', status);
+    
     if (!docClient) {
+      console.error('ArticleService.getArticles: No DynamoDB client available');
       throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
     }
 
@@ -136,13 +149,35 @@ export class ArticleService {
       };
     }
 
-    const result = await docClient.send(new ScanCommand(params));
-    
-    const articles = (result.Items as Article[] || []).sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    console.log('ArticleService.getArticles: Scan params:', {
+      TableName: params.TableName,
+      FilterExpression: params.FilterExpression,
+      ExpressionAttributeNames: params.ExpressionAttributeNames,
+      ExpressionAttributeValues: params.ExpressionAttributeValues
+    });
 
-    return articles;
+    try {
+      const result = await docClient.send(new ScanCommand(params));
+      console.log('ArticleService.getArticles: Scan result:', {
+        itemCount: result.Items?.length || 0,
+        scannedCount: result.ScannedCount,
+        consumedCapacity: result.ConsumedCapacity
+      });
+      
+      const articles = (result.Items as Article[] || []).sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      console.log('ArticleService.getArticles: Returning', articles.length, 'articles');
+      return articles;
+    } catch (error) {
+      console.error('ArticleService.getArticles: Scan failed:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        name: error instanceof Error ? error.name : undefined,
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      throw error;
+    }
   }
 
   static async updateArticle(id: string, updates: Partial<Article>): Promise<Article | null> {
