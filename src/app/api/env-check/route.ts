@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     // Get all environment variables (server-side only)
     const envVars = {
@@ -38,8 +38,8 @@ export async function GET(_request: NextRequest) {
     };
 
     // Security analysis
-    const securityIssues = [];
-    const recommendations = [];
+    const securityIssues: string[] = [];
+    const recommendations: string[] = [];
 
     // Check for secrets that might be exposed to client
     const serverOnlyVars = [

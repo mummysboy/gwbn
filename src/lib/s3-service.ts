@@ -21,9 +21,7 @@ let isLambda = false;
 // Initialize server-side configuration only
 if (typeof window === 'undefined') {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
     const serverConfig = require('./server-aws-config');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
     const clientConfig = require('./client-config');
     
     serverAWSConfig = serverConfig.serverAWSConfig;
