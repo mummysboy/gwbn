@@ -66,14 +66,11 @@ function initializeS3Client() {
           secretAccessKey: serverAWSConfig.secretAccessKey!,
         },
       });
-    } else if (hasIAMRole || isLambda) {
-      console.log('S3 Service: Using IAM role/Lambda credentials');
+    } else {
+      console.log('S3 Service: Using IAM role/default credentials (Gen 2 compatible)');
       s3Client = new S3Client({
         region: serverS3Config?.region || 'us-west-1',
       });
-    } else {
-      console.warn('S3 Service: No AWS credentials found. S3 operations will fail.');
-      s3Client = null;
     }
   } catch (error) {
     console.error('S3 Service: Failed to initialize S3 client:', error);
