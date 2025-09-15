@@ -9,7 +9,7 @@ export interface AWSConfig {
 }
 
 export const awsConfig: AWSConfig = {
-  region: process.env.REGION || 'us-east-1',
+  region: process.env.REGION || process.env.AWS_REGION || 'us-east-1',
   accessKeyId: process.env.ACCESS_KEY_ID,
   secretAccessKey: process.env.SECRET_ACCESS_KEY,
 };

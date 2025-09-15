@@ -5,13 +5,16 @@ import { awsConfig } from './aws-config';
 // Check if AWS credentials are configured
 const hasAWSCredentials = awsConfig.accessKeyId && awsConfig.secretAccessKey;
 const hasIAMRole = !!(process.env.ROLE_ARN || process.env.WEB_IDENTITY_TOKEN_FILE);
+const isLambda = !!(process.env.AWS_LAMBDA_FUNCTION_NAME);
 
 console.log('AWS Services: Initialization check:', {
   hasAWSCredentials,
   hasIAMRole,
+  isLambda,
   region: awsConfig.region,
   hasAccessKey: !!awsConfig.accessKeyId,
-  hasSecretKey: !!awsConfig.secretAccessKey
+  hasSecretKey: !!awsConfig.secretAccessKey,
+  awsRegion: process.env.AWS_REGION
 });
 
 // Initialize DynamoDB client
@@ -27,8 +30,8 @@ if (hasAWSCredentials) {
       secretAccessKey: awsConfig.secretAccessKey!,
     },
   });
-} else if (hasIAMRole) {
-  console.log('AWS Services: Using IAM role credentials');
+} else if (hasIAMRole || isLambda) {
+  console.log('AWS Services: Using IAM role/Lambda credentials');
   // Use IAM role (for AWS services like Lambda, EC2, etc.)
   client = new DynamoDBClient({
     region: awsConfig.region,
