@@ -32,7 +32,7 @@ async function getOpenAIApiKey(): Promise<string> {
       lastFetchTime = Date.now();
       
       console.log('Successfully retrieved OpenAI API key from Secrets Manager');
-      return cachedApiKey;
+      return cachedApiKey!;
     } else {
       throw new Error('No secret string found in Secrets Manager response');
     }

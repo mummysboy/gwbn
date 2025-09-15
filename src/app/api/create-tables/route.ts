@@ -14,67 +14,67 @@ export async function GET() {
       {
         TableName: 'gwbn-articles',
         KeySchema: [
-          { AttributeName: 'id', KeyType: 'HASH' }
+          { AttributeName: 'id', KeyType: 'HASH' as const }
         ],
         AttributeDefinitions: [
-          { AttributeName: 'id', AttributeType: 'S' },
-          { AttributeName: 'status', AttributeType: 'S' },
-          { AttributeName: 'createdAt', AttributeType: 'S' }
+          { AttributeName: 'id', AttributeType: 'S' as const },
+          { AttributeName: 'status', AttributeType: 'S' as const },
+          { AttributeName: 'createdAt', AttributeType: 'S' as const }
         ],
         GlobalSecondaryIndexes: [
           {
             IndexName: 'StatusIndex',
             KeySchema: [
-              { AttributeName: 'status', KeyType: 'HASH' },
-              { AttributeName: 'createdAt', KeyType: 'RANGE' }
+              { AttributeName: 'status', KeyType: 'HASH' as const },
+              { AttributeName: 'createdAt', KeyType: 'RANGE' as const }
             ],
-            Projection: { ProjectionType: 'ALL' },
-            BillingMode: 'PAY_PER_REQUEST'
+            Projection: { ProjectionType: 'ALL' as const },
+            BillingMode: 'PAY_PER_REQUEST' as const
           }
         ],
-        BillingMode: 'PAY_PER_REQUEST'
+        BillingMode: 'PAY_PER_REQUEST' as const
       },
       {
         TableName: 'gwbn-users',
         KeySchema: [
-          { AttributeName: 'id', KeyType: 'HASH' }
+          { AttributeName: 'id', KeyType: 'HASH' as const }
         ],
         AttributeDefinitions: [
-          { AttributeName: 'id', AttributeType: 'S' },
-          { AttributeName: 'email', AttributeType: 'S' }
+          { AttributeName: 'id', AttributeType: 'S' as const },
+          { AttributeName: 'email', AttributeType: 'S' as const }
         ],
         GlobalSecondaryIndexes: [
           {
             IndexName: 'EmailIndex',
             KeySchema: [
-              { AttributeName: 'email', KeyType: 'HASH' }
+              { AttributeName: 'email', KeyType: 'HASH' as const }
             ],
-            Projection: { ProjectionType: 'ALL' },
-            BillingMode: 'PAY_PER_REQUEST'
+            Projection: { ProjectionType: 'ALL' as const },
+            BillingMode: 'PAY_PER_REQUEST' as const
           }
         ],
-        BillingMode: 'PAY_PER_REQUEST'
+        BillingMode: 'PAY_PER_REQUEST' as const
       },
       {
         TableName: 'gwbn-analytics',
         KeySchema: [
-          { AttributeName: 'id', KeyType: 'HASH' }
+          { AttributeName: 'id', KeyType: 'HASH' as const }
         ],
         AttributeDefinitions: [
-          { AttributeName: 'id', AttributeType: 'S' },
-          { AttributeName: 'date', AttributeType: 'S' }
+          { AttributeName: 'id', AttributeType: 'S' as const },
+          { AttributeName: 'date', AttributeType: 'S' as const }
         ],
         GlobalSecondaryIndexes: [
           {
             IndexName: 'DateIndex',
             KeySchema: [
-              { AttributeName: 'date', KeyType: 'HASH' }
+              { AttributeName: 'date', KeyType: 'HASH' as const }
             ],
-            Projection: { ProjectionType: 'ALL' },
-            BillingMode: 'PAY_PER_REQUEST'
+            Projection: { ProjectionType: 'ALL' as const },
+            BillingMode: 'PAY_PER_REQUEST' as const
           }
         ],
-        BillingMode: 'PAY_PER_REQUEST'
+        BillingMode: 'PAY_PER_REQUEST' as const
       }
     ];
 
