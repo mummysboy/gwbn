@@ -37,7 +37,7 @@ interface ArticleContentWithPhotosProps {
   author?: string;
 }
 
-function ArticleContentWithPhotos({ content, images, title, author }: ArticleContentWithPhotosProps) {
+function ArticleContentWithPhotos({ content, images, title }: ArticleContentWithPhotosProps) {
   // Parse content into paragraphs
   const paragraphs = content.split('\n').filter(p => p.trim().length > 0);
   
@@ -77,7 +77,7 @@ function ArticleContentWithPhotos({ content, images, title, author }: ArticleCon
       {contentWithPhotos.map((item, index) => {
         if (typeof item === 'string') {
           // Render paragraph
-          const isFirstParagraph = index === 0 || (index === 1 && contentWithPhotos[0].type === 'photo');
+          const isFirstParagraph = index === 0 || (index === 1 && typeof contentWithPhotos[0] === 'object' && contentWithPhotos[0].type === 'photo');
           return (
             <p 
               key={index} 

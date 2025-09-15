@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { awsConfig } from '@/lib/aws-config';
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ArticleService } from '@/lib/aws-services';
+import { ArticleService, Article } from '@/lib/aws-services';
 
 // GET /api/articles/[id] - Get a specific article
 export async function GET(
@@ -60,7 +60,7 @@ export async function PUT(
     }
     
     // Prepare updates
-    const updates: any = {};
+    const updates: Partial<Article> = {};
     if (title) updates.title = title;
     if (content) {
       updates.content = content;

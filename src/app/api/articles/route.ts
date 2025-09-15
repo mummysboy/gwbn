@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ArticleService, Article } from '@/lib/aws-services';
+import { ArticleService } from '@/lib/aws-services';
 
 // GET /api/articles - Get all published articles
 export async function GET(request: NextRequest) {

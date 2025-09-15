@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { UserService } from '@/lib/aws-services';
+import { UserService, User } from '@/lib/aws-services';
 
 // GET /api/users/[id] - Get a specific user
 export async function GET(
@@ -51,7 +51,7 @@ export async function PUT(
     }
     
     // Prepare updates
-    const updates: any = {};
+    const updates: Partial<User> = {};
     if (name) updates.name = name;
     if (email) updates.email = email;
     if (role) updates.role = role;

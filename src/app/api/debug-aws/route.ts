@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { awsConfig } from '@/lib/aws-config';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const hasCredentials = !!(awsConfig.accessKeyId && awsConfig.secretAccessKey);
     

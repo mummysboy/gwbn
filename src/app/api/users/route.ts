@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { UserService } from '@/lib/aws-services';
 
 // GET /api/users - Get all users
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const users = await UserService.getUsers();
     

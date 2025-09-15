@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/analytics - Update analytics data
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const updatedStats = await AnalyticsService.updateDailyStats();
     

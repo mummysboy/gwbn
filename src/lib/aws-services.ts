@@ -1,5 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, ScanCommand, DeleteCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, PutCommand, GetCommand, ScanCommand, DeleteCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { awsConfig } from './aws-config';
 
 // Check if AWS credentials are configured
@@ -104,7 +104,12 @@ export class ArticleService {
       throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
     }
 
-    const params: any = {
+    const params: {
+      TableName: string;
+      FilterExpression?: string;
+      ExpressionAttributeNames?: Record<string, string>;
+      ExpressionAttributeValues?: Record<string, string>;
+    } = {
       TableName: TABLES.ARTICLES,
     };
 
@@ -130,7 +135,7 @@ export class ArticleService {
   static async updateArticle(id: string, updates: Partial<Article>): Promise<Article | null> {
     const updateExpression: string[] = [];
     const expressionAttributeNames: Record<string, string> = {};
-    const expressionAttributeValues: Record<string, any> = {};
+    const expressionAttributeValues: Record<string, unknown> = {};
 
     Object.keys(updates).forEach((key, index) => {
       if (key !== 'id' && updates[key as keyof Article] !== undefined) {
@@ -148,6 +153,10 @@ export class ArticleService {
     expressionAttributeNames['#updatedAt'] = 'updatedAt';
     expressionAttributeValues[':updatedAt'] = new Date().toISOString();
 
+    if (!docClient) {
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+    }
+
     const result = await docClient.send(new UpdateCommand({
       TableName: TABLES.ARTICLES,
       Key: { id },
@@ -161,6 +170,10 @@ export class ArticleService {
   }
 
   static async deleteArticle(id: string): Promise<boolean> {
+    if (!docClient) {
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+    }
+
     await docClient.send(new DeleteCommand({
       TableName: TABLES.ARTICLES,
       Key: { id },
@@ -170,6 +183,10 @@ export class ArticleService {
   }
 
   static async incrementViews(id: string): Promise<void> {
+    if (!docClient) {
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+    }
+
     await docClient.send(new UpdateCommand({
       TableName: TABLES.ARTICLES,
       Key: { id },
@@ -194,6 +211,10 @@ export class UserService {
       createdAt: now,
     };
 
+    if (!docClient) {
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+    }
+
     await docClient.send(new PutCommand({
       TableName: TABLES.USERS,
       Item: newUser,
@@ -203,6 +224,10 @@ export class UserService {
   }
 
   static async getUsers(): Promise<User[]> {
+    if (!docClient) {
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+    }
+
     const result = await docClient.send(new ScanCommand({
       TableName: TABLES.USERS,
     }));
@@ -213,6 +238,10 @@ export class UserService {
   }
 
   static async getUser(id: string): Promise<User | null> {
+    if (!docClient) {
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+    }
+
     const result = await docClient.send(new GetCommand({
       TableName: TABLES.USERS,
       Key: { id },
@@ -224,7 +253,7 @@ export class UserService {
   static async updateUser(id: string, updates: Partial<User>): Promise<User | null> {
     const updateExpression: string[] = [];
     const expressionAttributeNames: Record<string, string> = {};
-    const expressionAttributeValues: Record<string, any> = {};
+    const expressionAttributeValues: Record<string, unknown> = {};
 
     Object.keys(updates).forEach((key, index) => {
       if (key !== 'id' && updates[key as keyof User] !== undefined) {
@@ -236,6 +265,10 @@ export class UserService {
 
     if (updateExpression.length === 0) {
       return await this.getUser(id);
+    }
+
+    if (!docClient) {
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
     }
 
     const result = await docClient.send(new UpdateCommand({
@@ -251,6 +284,10 @@ export class UserService {
   }
 
   static async deleteUser(id: string): Promise<boolean> {
+    if (!docClient) {
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+    }
+
     await docClient.send(new DeleteCommand({
       TableName: TABLES.USERS,
       Key: { id },
@@ -265,6 +302,10 @@ export class AnalyticsService {
   static async getTodayStats(): Promise<Analytics | null> {
     const today = new Date().toISOString().split('T')[0];
     
+    if (!docClient) {
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+    }
+
     const result = await docClient.send(new GetCommand({
       TableName: TABLES.ANALYTICS,
       Key: { id: `daily_${today}` },
@@ -294,6 +335,10 @@ export class AnalyticsService {
       totalLikes,
       systemHealth: 99.9, // This could be calculated from actual system metrics
     };
+
+    if (!docClient) {
+      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials.');
+    }
 
     await docClient.send(new PutCommand({
       TableName: TABLES.ANALYTICS,
