@@ -134,6 +134,10 @@ export default function Home() {
                     width={800}
                     height={400}
                     className="w-full h-48 sm:h-64 object-cover"
+                    onError={(e) => {
+                      console.warn('Featured image failed to load:', featuredArticle.images[0]);
+                      e.currentTarget.src = '/placeholder-image.svg';
+                    }}
                   />
                 </div>
               )}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   DocumentTextIcon,
   TrashIcon,
@@ -38,8 +38,18 @@ interface Article {
 
 export default function AdminDashboard() {
   const [transcript, setTranscript] = useState('');
-  const [enhancedContent, setEnhancedContent] = useState('');
-  const [title, setTitle] = useState('');
+  const [enhancedContent, setEnhancedContent] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('admin-enhanced-content') || '';
+    }
+    return '';
+  });
+  const [title, setTitle] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('admin-title') || '';
+    }
+    return '';
+  });
   const [images, setImages] = useState<string[]>([]);
 
   // Debug: Log state changes
@@ -170,7 +180,7 @@ export default function AdminDashboard() {
     alert(error);
   };
 
-  const handleEnhanced = (title: string, content: string) => {
+  const handleEnhanced = useCallback((title: string, content: string) => {
     console.log('=== ADMIN HANDLE ENHANCED CALLED ===');
     console.log('Admin handleEnhanced called with:', { title, content });
     console.log('Title length:', title?.length);
@@ -182,10 +192,22 @@ export default function AdminDashboard() {
     setTitle(title);
     setEnhancedContent(content);
     
+    // Also save to localStorage for persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('admin-title', title);
+      localStorage.setItem('admin-enhanced-content', content);
+    }
+    
     console.log('Admin state updated - title:', title);
     console.log('Admin state updated - content length:', content?.length);
     console.log('=== ADMIN HANDLE ENHANCED COMPLETE ===');
-  };
+  }, [enhancedContent]);
+
+  // Debug: Log when state changes
+  useEffect(() => {
+    console.log('AdminDashboard useEffect - title changed to:', title);
+    console.log('AdminDashboard useEffect - enhancedContent length:', enhancedContent?.length);
+  }, [title, enhancedContent]);
 
   const publishArticle = async () => {
     if (!title.trim() || !enhancedContent.trim()) {
@@ -223,6 +245,12 @@ export default function AdminDashboard() {
         setTranscript('');
         setEnhancedContent('');
         setImages([]);
+        
+        // Clear localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('admin-title');
+          localStorage.removeItem('admin-enhanced-content');
+        }
         
         alert('Article published successfully!');
       } else {
@@ -282,6 +310,12 @@ export default function AdminDashboard() {
     setTitle('');
     setEnhancedContent('');
     setImages([]);
+    
+    // Clear localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('admin-title');
+      localStorage.removeItem('admin-enhanced-content');
+    }
   };
 
   const cancelEdit = () => {
@@ -289,6 +323,12 @@ export default function AdminDashboard() {
     setTitle('');
     setEnhancedContent('');
     setImages([]);
+    
+    // Clear localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('admin-title');
+      localStorage.removeItem('admin-enhanced-content');
+    }
   };
 
   return (
@@ -424,7 +464,12 @@ export default function AdminDashboard() {
                       <input
                         type="text"
                         value={title}
-                        onChange={(e) => setTitle(e.target.value)}
+                        onChange={(e) => {
+                          setTitle(e.target.value);
+                          if (typeof window !== 'undefined') {
+                            localStorage.setItem('admin-title', e.target.value);
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
                         placeholder="Enter article title..."
                       />
@@ -436,7 +481,12 @@ export default function AdminDashboard() {
                       </label>
                       <textarea
                         value={enhancedContent}
-                        onChange={(e) => setEnhancedContent(e.target.value)}
+                        onChange={(e) => {
+                          setEnhancedContent(e.target.value);
+                          if (typeof window !== 'undefined') {
+                            localStorage.setItem('admin-enhanced-content', e.target.value);
+                          }
+                        }}
                         rows={8}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
                         placeholder="AI-enhanced content will appear here..."

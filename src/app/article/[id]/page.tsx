@@ -101,6 +101,11 @@ function ArticleContentWithPhotos({ content, images, title }: ArticleContentWith
                   height={isThumbnail ? 500 : 300}
                   className="w-full h-auto"
                   style={{ objectFit: 'cover' }}
+                  onError={(e) => {
+                    console.warn('Image failed to load:', item.src);
+                    // Replace with placeholder image on error
+                    e.currentTarget.src = '/placeholder-image.svg';
+                  }}
                 />
               </div>
             </div>
