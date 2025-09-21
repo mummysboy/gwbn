@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { transcribeAudioSimple } from '@/lib/transcription-service';
 
 export async function POST(request: NextRequest) {
   try {
