@@ -15,8 +15,17 @@ export default function AIEnhancer({ transcript, notes = '', onEnhanced }: AIEnh
   const [hasGenerated, setHasGenerated] = useState(false);
 
   const enhanceContent = async () => {
-    if (!transcript.trim()) return;
+    console.log('AIEnhancer: enhanceContent called');
+    console.log('AIEnhancer: transcript:', transcript);
+    console.log('AIEnhancer: transcript.trim():', transcript.trim());
+    console.log('AIEnhancer: transcript length:', transcript.length);
     
+    if (!transcript.trim()) {
+      console.log('AIEnhancer: No transcript provided, returning early');
+      return;
+    }
+    
+    console.log('AIEnhancer: Starting enhancement process');
     setIsEnhancing(true);
     
     try {
@@ -55,6 +64,8 @@ export default function AIEnhancer({ transcript, notes = '', onEnhanced }: AIEnh
         // Test if onEnhanced is working
         try {
           console.log('About to call onEnhanced with:', { title: result.title, content: result.content });
+          console.log('onEnhanced function type:', typeof onEnhanced);
+          console.log('onEnhanced function:', onEnhanced);
           onEnhanced(result.title, result.content);
           console.log('onEnhanced called successfully');
         } catch (error) {
@@ -117,12 +128,28 @@ Residents can expect to receive more information about the project in the coming
     return { title, content };
   };
 
+  // Debug: Log component state
+  console.log('AIEnhancer: Component render - transcript length:', transcript.length, 'isEnhancing:', isEnhancing, 'hasGenerated:', hasGenerated);
+
   return (
     <div className="space-y-6">
+      {/* Debug Info */}
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 text-sm">
+        <div className="text-yellow-800 dark:text-yellow-300">
+          <strong>Debug Info:</strong> Transcript length: {transcript.length}, Enhancing: {isEnhancing.toString()}, Generated: {hasGenerated.toString()}
+        </div>
+      </div>
+
       {/* Generate Button */}
       <div className="text-center">
         <Button
-          onClick={enhanceContent}
+          onClick={() => {
+            console.log('AIEnhancer: Button clicked');
+            console.log('AIEnhancer: isEnhancing:', isEnhancing);
+            console.log('AIEnhancer: transcript.trim():', transcript.trim());
+            console.log('AIEnhancer: Button disabled:', isEnhancing || !transcript.trim());
+            enhanceContent();
+          }}
           disabled={isEnhancing || !transcript.trim()}
           className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-8 py-4 rounded-lg text-lg font-semibold shadow-lg"
         >

@@ -1,6 +1,6 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { TranscribeClient, StartTranscriptionJobCommand, GetTranscriptionJobCommand } from '@aws-sdk/client-transcribe';
-// import { S3Service } from './s3-service';
+import { getAWSConfig, getS3Config } from './enhanced-aws-config';
 
 // Cache for the Transcribe client
 let cachedTranscribeClient: TranscribeClient | null = null;
@@ -8,10 +8,12 @@ let cachedTranscribeClient: TranscribeClient | null = null;
 /**
  * Creates and returns a Transcribe client instance
  */
-function getTranscribeClient(): TranscribeClient {
+async function getTranscribeClient(): Promise<TranscribeClient> {
   if (!cachedTranscribeClient) {
+    const awsConfig = await getAWSConfig();
     cachedTranscribeClient = new TranscribeClient({
-      region: process.env.AWS_REGION || 'us-west-1',
+      region: awsConfig.region,
+      credentials: awsConfig.credentials,
     });
   }
   return cachedTranscribeClient;
@@ -32,14 +34,17 @@ async function uploadAudioToS3(audioFile: File): Promise<{ success: boolean; key
     // Convert file to buffer
     const buffer = Buffer.from(await audioFile.arrayBuffer());
 
-    // Create S3 client (reuse existing configuration)
+    // Create S3 client with enhanced configuration
+    const awsConfig = await getAWSConfig();
+    const s3Config = await getS3Config();
     const s3Client = new S3Client({
-      region: process.env.AWS_REGION || 'us-west-1',
+      region: awsConfig.region,
+      credentials: awsConfig.credentials,
     });
 
     // Upload to S3
     const command = new PutObjectCommand({
-      Bucket: 'gwbn-storage', // Using hardcoded bucket name
+      Bucket: s3Config.bucketName,
       Key: key,
       Body: buffer,
       ContentType: audioFile.type,
@@ -64,7 +69,8 @@ async function uploadAudioToS3(audioFile: File): Promise<{ success: boolean; key
  */
 async function startTranscriptionJob(audioKey: string): Promise<{ success: boolean; jobName?: string; error?: string }> {
   try {
-    const transcribeClient = getTranscribeClient();
+    const transcribeClient = await getTranscribeClient();
+    const s3Config = await getS3Config();
     
     // Generate unique job name
     const jobName = `transcription-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -73,10 +79,10 @@ async function startTranscriptionJob(audioKey: string): Promise<{ success: boole
       TranscriptionJobName: jobName,
       LanguageCode: 'en-US',
       Media: {
-        MediaFileUri: `s3://gwbn-storage/${audioKey}`
+        MediaFileUri: `s3://${s3Config.bucketName}/${audioKey}`
       },
       MediaFormat: 'webm', // Adjust based on your audio format
-      OutputBucketName: 'gwbn-storage',
+      OutputBucketName: s3Config.bucketName,
       OutputKey: `transcriptions/results/${jobName}.json`
     });
 
@@ -99,7 +105,8 @@ async function startTranscriptionJob(audioKey: string): Promise<{ success: boole
  */
 async function pollTranscriptionJob(jobName: string, maxAttempts: number = 30): Promise<{ success: boolean; transcript?: string; error?: string }> {
   try {
-    const transcribeClient = getTranscribeClient();
+    const transcribeClient = await getTranscribeClient();
+    const s3Config = await getS3Config();
     
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const command = new GetTranscriptionJobCommand({
@@ -128,22 +135,24 @@ async function pollTranscriptionJob(jobName: string, maxAttempts: number = 30): 
               const url = new URL(transcriptUri);
               const pathname = url.pathname.substring(1); // Remove leading slash
               // Remove bucket name from the path if it's included
-              s3Key = pathname.replace('gwbn-storage/', '');
+              s3Key = pathname.replace(`${s3Config.bucketName}/`, '');
             } else if (transcriptUri.startsWith('s3://')) {
               // Extract key from S3 URI
-              s3Key = transcriptUri.replace('s3://gwbn-storage/', '');
+              s3Key = transcriptUri.replace(`s3://${s3Config.bucketName}/`, '');
             } else {
               // Assume it's already just the key
               s3Key = transcriptUri;
             }
             console.log('S3 Key:', s3Key);
             
+            const awsConfig = await getAWSConfig();
             const s3Client = new S3Client({
-              region: process.env.AWS_REGION || 'us-west-1',
+              region: awsConfig.region,
+              credentials: awsConfig.credentials,
             });
 
             const getCommand = new GetObjectCommand({
-              Bucket: 'gwbn-storage',
+              Bucket: s3Config.bucketName,
               Key: s3Key
             });
 
@@ -296,7 +305,7 @@ export async function transcribeAudioSimple(audioFile: File): Promise<{ success:
  */
 export async function testTranscribeConnection(): Promise<{ success: boolean; message: string }> {
   try {
-    const _transcribeClient = getTranscribeClient();
+    const _transcribeClient = await getTranscribeClient();
     
     // Try to list transcription jobs (this will test connectivity)
     // Note: This is a simplified test - in production you might want to use a different test

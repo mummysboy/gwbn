@@ -41,6 +41,9 @@ export default function AdminDashboard() {
   const [enhancedContent, setEnhancedContent] = useState('');
   const [title, setTitle] = useState('');
   const [images, setImages] = useState<string[]>([]);
+
+  // Debug: Log state changes
+  console.log('AdminDashboard render - title:', title, 'enhancedContent length:', enhancedContent?.length);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
@@ -172,6 +175,8 @@ export default function AdminDashboard() {
     console.log('Admin handleEnhanced called with:', { title, content });
     console.log('Title length:', title?.length);
     console.log('Content length:', content?.length);
+    console.log('Current title state before update:', title);
+    console.log('Current enhancedContent state before update length:', enhancedContent?.length);
     
     // Set the title and content properly
     setTitle(title);
@@ -583,6 +588,27 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Debug Panel */}
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 mb-6">
+            <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-300 mb-2">
+              Debug Panel
+            </h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <strong>Title:</strong> {title || 'Empty'}
+              </div>
+              <div>
+                <strong>Enhanced Content Length:</strong> {enhancedContent?.length || 0}
+              </div>
+              <div>
+                <strong>Transcript Length:</strong> {transcript?.length || 0}
+              </div>
+              <div>
+                <strong>Images Count:</strong> {images?.length || 0}
+              </div>
+            </div>
           </div>
 
           {/* Main Content Grid */}

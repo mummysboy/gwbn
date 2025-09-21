@@ -14,15 +14,10 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // Add experimental features for better Amplify compatibility
-  experimental: {
-    // Disable server components caching for Amplify
-    serverComponentsExternalPackages: [],
-  },
   // Ensure proper build output for Amplify
   trailingSlash: false,
-  // Disable static optimization for dynamic routes
-  generateStaticParams: false,
+  // Server external packages for AWS SDK
+  serverExternalPackages: ['@aws-sdk/client-bedrock-runtime', '@aws-sdk/client-transcribe', '@aws-sdk/client-s3', '@aws-sdk/client-secrets-manager'],
 };
 
 export default nextConfig;

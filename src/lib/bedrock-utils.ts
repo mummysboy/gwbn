@@ -1,5 +1,6 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { TranscribeClient } from '@aws-sdk/client-transcribe';
+import { getAWSConfig, getBedrockConfig } from './enhanced-aws-config';
 
 // Cache for the Bedrock client to avoid repeated initialization
 let cachedBedrockClient: BedrockRuntimeClient | null = null;
@@ -8,10 +9,14 @@ let cachedTranscribeClient: TranscribeClient | null = null;
 /**
  * Creates and returns a Bedrock Runtime client instance
  */
-export function getBedrockClient(): BedrockRuntimeClient {
+export async function getBedrockClient(): Promise<BedrockRuntimeClient> {
   if (!cachedBedrockClient) {
+    const awsConfig = await getAWSConfig();
+    const bedrockConfig = await getBedrockConfig();
+    
     cachedBedrockClient = new BedrockRuntimeClient({
-      region: process.env.AWS_REGION || 'us-west-1',
+      region: bedrockConfig.region,
+      credentials: awsConfig.credentials,
     });
   }
   return cachedBedrockClient;
@@ -39,7 +44,7 @@ export async function generateArticleFromTranscript(
   try {
     console.log('Using AWS Bedrock for article generation');
     
-    const bedrockClient = getBedrockClient();
+    const bedrockClient = await getBedrockClient();
     
     const prompt = `You are a professional journalist writing for "Golden West Business News", a local newspaper covering Santa Barbara and the surrounding area.
 
@@ -301,7 +306,7 @@ export async function generateListingDescription(params: {
   location: string;
   features: string[];
 }): Promise<string> {
-  const bedrockClient = getBedrockClient();
+  const bedrockClient = await getBedrockClient();
 
   const prompt = `Create a compelling real estate listing description for:
 - Type: ${params.type}
@@ -351,7 +356,7 @@ export async function testBedrockConnection(): Promise<{ success: boolean; messa
   try {
     console.log('Testing AWS Bedrock connectivity...');
     
-    const bedrockClient = getBedrockClient();
+    const bedrockClient = await getBedrockClient();
     
     // Test with a simple prompt
     const command = new InvokeModelCommand({
