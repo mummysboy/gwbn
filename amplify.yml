@@ -3,7 +3,8 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        - npm install --legacy-peer-deps
+        - npm rebuild sharp
     build:
       commands:
         - npm run build

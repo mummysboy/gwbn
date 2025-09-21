@@ -169,7 +169,7 @@ export async function testSecretsManagerConnection(): Promise<{
   message: string;
 }> {
   try {
-    const _client = getSecretsManagerClient();
+    // const _client = getSecretsManagerClient();
     
     // Try to list secrets (this will test connectivity)
     // Note: This is a simplified test - in production you might want to use a different test

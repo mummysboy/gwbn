@@ -305,7 +305,7 @@ export async function transcribeAudioSimple(audioFile: File): Promise<{ success:
  */
 export async function testTranscribeConnection(): Promise<{ success: boolean; message: string }> {
   try {
-    const _transcribeClient = await getTranscribeClient();
+    // const _transcribeClient = await getTranscribeClient();
     
     // Try to list transcription jobs (this will test connectivity)
     // Note: This is a simplified test - in production you might want to use a different test

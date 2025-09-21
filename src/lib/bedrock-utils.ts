@@ -121,7 +121,7 @@ Format the response as JSON with "title" and "content" fields.`;
 
 function generateLocalArticle(transcript: string, notes: string = ''): { title: string; content: string } {
   // Generate article using local AI logic that's actually based on the transcript
-  const _words = transcript.toLowerCase().split(/\s+/);
+  // const _words = transcript.toLowerCase().split(/\s+/);
   
   // Extract key concepts from the transcript
   const keyConcepts = extractKeyConcepts(transcript);
@@ -266,10 +266,10 @@ The ongoing conversation reflects the community's dedication to maintaining open
  */
 export async function transcribeAudio(audioFile: File): Promise<string> {
   try {
-    const _transcribeClient = getTranscribeClient();
+    // const _transcribeClient = getTranscribeClient();
     
     // Generate a unique job name
-    const _jobName = `transcription-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // const _jobName = `transcription-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     // For now, we'll use a simplified approach since we need to upload to S3 first
     // This is a placeholder implementation - in production, you'd want to:

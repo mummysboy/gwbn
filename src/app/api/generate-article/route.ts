@@ -25,11 +25,11 @@ export async function POST(request: NextRequest) {
     console.error('Bedrock article generation error:', error);
     
     // Fallback to local generation if Bedrock fails
-    return await generateArticleLocally(transcript, notes);
+    return await generateArticleLocally(transcript);
   }
 }
 
-async function generateArticleLocally(transcript: string, _notes: string) {
+async function generateArticleLocally(transcript: string) {
   try {
     console.log('WORKING: generateArticleLocally called with transcript:', transcript);
     

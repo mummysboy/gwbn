@@ -175,7 +175,7 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
     }
   };
 
-  const _startClientSideTranscription = async () => {
+  /* const _startClientSideTranscription = async () => {
     return new Promise<void>((resolve, reject) => {
       // Check if SpeechRecognition is supported
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -235,7 +235,7 @@ export default function VoiceRecorder({ onTranscript, onError }: VoiceRecorderPr
         recognition.stop();
       }, 30000);
     });
-  };
+  }; */
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
