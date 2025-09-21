@@ -37,13 +37,16 @@ interface Article {
 }
 
 export default function AdminDashboard() {
+  // Generate unique instance ID to track component lifecycle
+  const [instanceId] = useState(() => Math.random().toString(36).substr(2, 9));
+  
   const [transcript, setTranscript] = useState('');
   const [enhancedContent, setEnhancedContent] = useState('');
   const [title, setTitle] = useState('');
   const [images, setImages] = useState<string[]>([]);
 
-  // Debug: Log state changes
-  console.log('AdminDashboard render - title:', title, 'enhancedContent length:', enhancedContent?.length);
+  // Debug: Log state changes with instance ID
+  console.log(`[${instanceId}] AdminDashboard render - title:`, title, 'enhancedContent length:', enhancedContent?.length);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
@@ -73,15 +76,16 @@ export default function AdminDashboard() {
 
   // Load from localStorage after component mounts
   useEffect(() => {
+    console.log(`[${instanceId}] Component mounted, loading from localStorage`);
     const savedTitle = localStorage.getItem('admin-title') || '';
     const savedContent = localStorage.getItem('admin-enhanced-content') || '';
     
     if (savedTitle || savedContent) {
-      console.log('Loading from localStorage:', { savedTitle, savedContentLength: savedContent.length });
+      console.log(`[${instanceId}] Loading from localStorage:`, { savedTitle, savedContentLength: savedContent.length });
       setTitle(savedTitle);
       setEnhancedContent(savedContent);
     }
-  }, []);
+  }, [instanceId]);
 
   // Fetch articles and analytics from API
   useEffect(() => {
@@ -183,10 +187,10 @@ export default function AdminDashboard() {
   };
 
   const handleEnhanced = useCallback((title: string, content: string) => {
-    console.log('=== ADMIN HANDLE ENHANCED CALLED ===');
-    console.log('Admin handleEnhanced called with:', { title, content });
-    console.log('Title length:', title?.length);
-    console.log('Content length:', content?.length);
+    console.log(`[${instanceId}] === ADMIN HANDLE ENHANCED CALLED ===`);
+    console.log(`[${instanceId}] Admin handleEnhanced called with:`, { title, content });
+    console.log(`[${instanceId}] Title length:`, title?.length);
+    console.log(`[${instanceId}] Content length:`, content?.length);
     
     // Set the title and content properly
     setTitle(title);
@@ -198,16 +202,25 @@ export default function AdminDashboard() {
       localStorage.setItem('admin-enhanced-content', content);
     }
     
-    console.log('Admin state updated - title:', title);
-    console.log('Admin state updated - content length:', content?.length);
-    console.log('=== ADMIN HANDLE ENHANCED COMPLETE ===');
-  }, []);
+    console.log(`[${instanceId}] Admin state updated - title:`, title);
+    console.log(`[${instanceId}] Admin state updated - content length:`, content?.length);
+    console.log(`[${instanceId}] === ADMIN HANDLE ENHANCED COMPLETE ===`);
+  }, [instanceId]);
 
   // Debug: Log when state changes
   useEffect(() => {
-    console.log('AdminDashboard useEffect - title changed to:', title);
-    console.log('AdminDashboard useEffect - enhancedContent length:', enhancedContent?.length);
-  }, [title, enhancedContent]);
+    console.log(`[${instanceId}] AdminDashboard useEffect - title changed to:`, title);
+    console.log(`[${instanceId}] AdminDashboard useEffect - enhancedContent length:`, enhancedContent?.length);
+  }, [title, enhancedContent, instanceId]);
+
+  // Component lifecycle tracking
+  useEffect(() => {
+    console.log(`[${instanceId}] Component mounted`);
+    
+    return () => {
+      console.log(`[${instanceId}] Component UNMOUNTED - this might explain state reset!`);
+    };
+  }, [instanceId]);
 
   const publishArticle = async () => {
     if (!title.trim() || !enhancedContent.trim()) {
