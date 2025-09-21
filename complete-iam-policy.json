@@ -146,6 +146,30 @@
 				"arn:aws:iam::*:role/AmplifySSRLoggingRole-*",
 				"arn:aws:iam::*:role/gwbn-*"
 			]
+		},
+		{
+			"Sid": "TranscribeAccess",
+			"Effect": "Allow",
+			"Action": [
+				"transcribe:StartTranscriptionJob",
+				"transcribe:GetTranscriptionJob",
+				"transcribe:ListTranscriptionJobs"
+			],
+			"Resource": [
+				"arn:aws:transcribe:us-west-1:*:transcription-job/gwbn-*"
+			]
+		},
+		{
+			"Sid": "BedrockAccess",
+			"Effect": "Allow",
+			"Action": [
+				"bedrock:InvokeModel",
+				"bedrock:InvokeModelWithResponseStream"
+			],
+			"Resource": [
+				"arn:aws:bedrock:us-west-1::foundation-model/amazon.titan-text-express-v1",
+				"arn:aws:bedrock:us-west-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
+			]
 		}
 	]
 }
