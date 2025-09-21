@@ -38,18 +38,8 @@ interface Article {
 
 export default function AdminDashboard() {
   const [transcript, setTranscript] = useState('');
-  const [enhancedContent, setEnhancedContent] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('admin-enhanced-content') || '';
-    }
-    return '';
-  });
-  const [title, setTitle] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('admin-title') || '';
-    }
-    return '';
-  });
+  const [enhancedContent, setEnhancedContent] = useState('');
+  const [title, setTitle] = useState('');
   const [images, setImages] = useState<string[]>([]);
 
   // Debug: Log state changes
@@ -80,6 +70,18 @@ export default function AdminDashboard() {
       systemHealth: number;
     };
   } | null>(null);
+
+  // Load from localStorage after component mounts
+  useEffect(() => {
+    const savedTitle = localStorage.getItem('admin-title') || '';
+    const savedContent = localStorage.getItem('admin-enhanced-content') || '';
+    
+    if (savedTitle || savedContent) {
+      console.log('Loading from localStorage:', { savedTitle, savedContentLength: savedContent.length });
+      setTitle(savedTitle);
+      setEnhancedContent(savedContent);
+    }
+  }, []);
 
   // Fetch articles and analytics from API
   useEffect(() => {
@@ -185,8 +187,6 @@ export default function AdminDashboard() {
     console.log('Admin handleEnhanced called with:', { title, content });
     console.log('Title length:', title?.length);
     console.log('Content length:', content?.length);
-    console.log('Current title state before update:', title);
-    console.log('Current enhancedContent state before update length:', enhancedContent?.length);
     
     // Set the title and content properly
     setTitle(title);
@@ -201,7 +201,7 @@ export default function AdminDashboard() {
     console.log('Admin state updated - title:', title);
     console.log('Admin state updated - content length:', content?.length);
     console.log('=== ADMIN HANDLE ENHANCED COMPLETE ===');
-  }, [enhancedContent]);
+  }, []);
 
   // Debug: Log when state changes
   useEffect(() => {

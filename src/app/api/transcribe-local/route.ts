@@ -22,9 +22,16 @@ export async function POST(request: NextRequest) {
     });
 
     // Use the actual transcription service that tries AWS Transcribe first
+    console.log('Calling transcribeAudioSimple with audio file:', {
+      size: audioFile.size,
+      type: audioFile.type,
+      name: audioFile.name
+    });
+    
     const result = await transcribeAudioSimple(audioFile);
 
-    console.log('Transcription completed:', result.success ? 'successfully' : 'with fallback');
+    console.log('Transcription completed:', result.success ? 'successfully with AWS' : 'with fallback');
+    console.log('Transcription result:', { success: result.success, transcriptLength: result.transcript?.length });
 
     return NextResponse.json({ 
       transcript: result.transcript,
