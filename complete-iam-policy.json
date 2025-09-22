@@ -167,8 +167,9 @@
 				"bedrock:InvokeModelWithResponseStream"
 			],
 			"Resource": [
-				"arn:aws:bedrock:us-west-1::foundation-model/amazon.titan-text-express-v1",
-				"arn:aws:bedrock:us-west-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
+				"arn:aws:bedrock:us-west-1::foundation-model/amazon.nova-lite-v1:0",
+				"arn:aws:bedrock:us-west-1::foundation-model/amazon.nova-pro-v1:0",
+				"arn:aws:bedrock:us-west-1::foundation-model/anthropic.claude-sonnet-4-20250514-v1:0"
 			]
 		}
 	]

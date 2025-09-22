@@ -96,7 +96,7 @@ export async function getBedrockConfigFromSecrets(): Promise<{
     const bedrockConfig = await getSecret('gwbn/bedrock-config');
     
     return {
-      modelId: (bedrockConfig.modelId as string) || 'amazon.titan-text-express-v1',
+      modelId: (bedrockConfig.modelId as string) || 'anthropic.claude-sonnet-4-20250514-v1:0',
       region: (bedrockConfig.region as string) || 'us-west-1',
     };
   } catch (error) {
