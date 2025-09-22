@@ -74,18 +74,24 @@ export default function AdminDashboard() {
     };
   } | null>(null);
 
-  // Load from localStorage after component mounts
+  // Load from localStorage after component mounts (only once)
   useEffect(() => {
     console.log(`[${instanceId}] Component mounted, loading from localStorage`);
     const savedTitle = localStorage.getItem('admin-title') || '';
     const savedContent = localStorage.getItem('admin-enhanced-content') || '';
     
-    if (savedTitle || savedContent) {
+    console.log(`[${instanceId}] Current state before localStorage load:`, { title, enhancedContentLength: enhancedContent?.length });
+    console.log(`[${instanceId}] localStorage values:`, { savedTitle, savedContentLength: savedContent.length });
+    
+    // Only load from localStorage if current state is empty
+    if ((!title && !enhancedContent) && (savedTitle || savedContent)) {
       console.log(`[${instanceId}] Loading from localStorage:`, { savedTitle, savedContentLength: savedContent.length });
       setTitle(savedTitle);
       setEnhancedContent(savedContent);
+    } else {
+      console.log(`[${instanceId}] Skipping localStorage load - current state has data or no saved data`);
     }
-  }, [instanceId]);
+  }, []); // Empty dependency array - only run once on mount
 
   // Fetch articles and analytics from API
   useEffect(() => {
