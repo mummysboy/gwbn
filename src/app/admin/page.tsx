@@ -91,7 +91,7 @@ export default function AdminDashboard() {
     } else {
       console.log(`[${instanceId}] Skipping localStorage load - current state has data or no saved data`);
     }
-  }, []); // Empty dependency array - only run once on mount
+  }, [enhancedContent, instanceId, title]); // Include all dependencies as required by ESLint
 
   // Fetch articles and analytics from API
   useEffect(() => {

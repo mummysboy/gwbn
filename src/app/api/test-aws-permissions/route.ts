@@ -3,7 +3,7 @@ import { TranscribeClient, ListTranscriptionJobsCommand } from '@aws-sdk/client-
 import { S3Client, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { getAWSConfig, getS3Config } from '@/lib/enhanced-aws-config';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log('Testing AWS permissions...');
     
