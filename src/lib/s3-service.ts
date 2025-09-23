@@ -234,10 +234,12 @@ export class S3Service {
         return null;
       }
 
-      const client = new S3Client({
-        region: serverS3Config.region,
-        credentials: serverS3Config.credentials,
-      });
+      // Use the existing initialized client or create a new one
+      const client = initializeS3Client();
+      if (!client) {
+        console.error('S3 Service: S3 client not initialized');
+        return null;
+      }
 
       const command = new GetObjectCommand({
         Bucket: serverS3Config.bucketName,
