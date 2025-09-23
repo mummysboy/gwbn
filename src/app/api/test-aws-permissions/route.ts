@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { TranscribeClient, ListTranscriptionJobsCommand } from '@aws-sdk/client-transcribe';
 import { S3Client, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { getAWSConfig, getS3Config } from '@/lib/enhanced-aws-config';
