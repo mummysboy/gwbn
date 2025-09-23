@@ -1,5 +1,6 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { getS3Config } from './enhanced-aws-config';
 
 // Server-only imports - these will throw errors if imported by client components
 interface ServerAWSConfig {
@@ -226,7 +227,7 @@ export class S3Service {
    */
   static async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string | null> {
     try {
-      const serverS3Config = await getServerS3Config();
+      const serverS3Config = await getS3Config();
       
       if (!serverS3Config) {
         console.error('S3 Service: No S3 configuration available');
