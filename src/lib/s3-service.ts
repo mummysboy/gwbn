@@ -1,4 +1,5 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 // Server-only imports - these will throw errors if imported by client components
 interface ServerAWSConfig {
@@ -122,13 +123,13 @@ export class S3Service {
       // Convert file to buffer
       const buffer = Buffer.from(await file.arrayBuffer());
 
-      // Upload to S3
+      // Upload to S3 (bucket policy will handle public access)
       const command = new PutObjectCommand({
         Bucket: serverS3Config.bucketName,
         Key: key,
         Body: buffer,
         ContentType: file.type,
-        // Note: ACL removed - bucket should be configured for public access via bucket policy
+        // ACL removed - bucket policy should handle public access
       });
 
       await client.send(command);
@@ -216,6 +217,36 @@ export class S3Service {
       return pathname.startsWith('/') ? pathname.substring(1) : pathname;
     } catch {
       console.error('S3 Service: Invalid URL:', url);
+      return null;
+    }
+  }
+
+  /**
+   * Generate a signed URL for accessing an S3 object
+   */
+  static async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string | null> {
+    try {
+      const serverS3Config = await getServerS3Config();
+      
+      if (!serverS3Config) {
+        console.error('S3 Service: No S3 configuration available');
+        return null;
+      }
+
+      const client = new S3Client({
+        region: serverS3Config.region,
+        credentials: serverS3Config.credentials,
+      });
+
+      const command = new GetObjectCommand({
+        Bucket: serverS3Config.bucketName,
+        Key: key,
+      });
+
+      const signedUrl = await getSignedUrl(client, command, { expiresIn });
+      return signedUrl;
+    } catch (error) {
+      console.error('S3 Service: Failed to generate signed URL:', error);
       return null;
     }
   }

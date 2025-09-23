@@ -198,7 +198,9 @@ export default function Home() {
                 {article.images.length > 0 && (
                   <div className="flex-shrink-0">
                     <Image
-                      src={article.images[0]}
+                      src={article.images[0].includes('s3.amazonaws.com') || article.images[0].includes('s3.us-west-1.amazonaws.com')
+                        ? `/api/image-proxy?key=${encodeURIComponent(article.images[0].split('/').slice(-2).join('/'))}`
+                        : article.images[0]}
                       alt={article.title}
                       width={120}
                       height={80}

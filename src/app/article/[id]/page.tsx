@@ -91,18 +91,23 @@ function ArticleContentWithPhotos({ content, images, title }: ArticleContentWith
           const isThumbnail = item.index === 0;
           const borderClass = isThumbnail ? 'border-2 border-black' : 'border border-gray-400';
           
+          // Check if this is an S3 URL and convert to proxy URL for signed access
+          const imageSrc = item.src.includes('s3.amazonaws.com') || item.src.includes('s3.us-west-1.amazonaws.com')
+            ? `/api/image-proxy?key=${encodeURIComponent(item.src.split('/').slice(-2).join('/'))}`
+            : item.src;
+
           return (
             <div key={index} className="w-full mb-6">
               <div className={`${borderClass} max-w-md mx-auto`}>
                 <Image
-                  src={item.src}
+                  src={imageSrc}
                   alt={item.alt}
                   width={400}
                   height={isThumbnail ? 500 : 300}
                   className="w-full h-auto"
                   style={{ objectFit: 'cover' }}
                   onError={(e) => {
-                    console.warn('Image failed to load:', item.src);
+                    console.warn('Image failed to load:', imageSrc);
                     // Replace with placeholder image on error
                     e.currentTarget.src = '/placeholder-image.svg';
                   }}

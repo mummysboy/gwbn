@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Service, UploadResult } from '@/lib/s3-service';
-import { LocalStorageService, LocalUploadResult } from '@/lib/local-storage-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,28 +30,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Attempt S3 upload first (using IAM roles, no explicit env vars needed)
-    let result: UploadResult | LocalUploadResult;
-    try {
-      console.log('Upload API: Attempting S3 upload with IAM roles');
-      result = await S3Service.uploadImage(file, folder);
-
-      if (!result.success) {
-        console.warn('S3 upload failed, falling back to local storage:', result.error);
-        result = await LocalStorageService.uploadImage(file, folder);
-      }
-    } catch (s3Error) {
-      console.error('S3 upload threw an error, falling back to local storage:', s3Error);
-      result = await LocalStorageService.uploadImage(file, folder);
-    }
+    // Upload to S3
+    console.log('Upload API: Attempting S3 upload');
+    const result: UploadResult = await S3Service.uploadImage(file, folder);
 
     if (result.success) {
-      const key = 'key' in result ? result.key : ('filename' in result ? result.filename : undefined);
       return NextResponse.json({
         success: true,
         url: result.url,
-        key,
-        storageType: 'key' in result ? 's3' : 'local'
+        key: result.key,
+        storageType: 's3'
       });
     } else {
       return NextResponse.json(

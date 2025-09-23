@@ -68,7 +68,9 @@ if (hasAWSCredentials && serverAWSConfig) {
     region: serverAWSConfig?.region || 'us-west-1',
   });
 } else {
-  console.warn('AWS Services: No AWS credentials found. DynamoDB operations will fail.');
+  console.warn('AWS Services: No AWS credentials found. Using mock data for development.');
+  // For development without AWS credentials, we'll use mock data
+  client = null;
 }
 
 const docClient = client ? DynamoDBDocumentClient.from(client) : null;
@@ -118,11 +120,54 @@ export interface Analytics {
   systemHealth: number;
 }
 
+// Mock data for development
+const mockArticles: Article[] = [
+  {
+    id: 'article_1',
+    title: 'Local Business Thrives Despite Economic Challenges',
+    content: 'In the heart of downtown, a family-owned restaurant has managed to not only survive but thrive during recent economic challenges...',
+    images: ['/uploads/articles/sample1.jpg'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: 'published',
+    author: 'John Smith',
+    category: 'Business',
+    readTime: 5,
+    views: 150,
+    likes: 12,
+  },
+  {
+    id: 'article_2',
+    title: 'New Tech Startup Raises $2M in Seed Funding',
+    content: 'A promising tech startup focused on sustainable energy solutions has successfully raised $2 million in seed funding...',
+    images: ['/uploads/articles/sample2.jpg'],
+    createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+    updatedAt: new Date(Date.now() - 86400000).toISOString(),
+    status: 'published',
+    author: 'Sarah Johnson',
+    category: 'Technology',
+    readTime: 3,
+    views: 89,
+    likes: 7,
+  }
+];
+
 // Article operations
 export class ArticleService {
   static async createArticle(article: Omit<Article, 'id' | 'createdAt' | 'updatedAt'>): Promise<Article> {
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
+      console.log('ArticleService.createArticle: Using mock data (no AWS credentials)');
+      const now = new Date().toISOString();
+      const newArticle: Article = {
+        ...article,
+        id: `article_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        createdAt: now,
+        updatedAt: now,
+        views: 0,
+        likes: 0,
+      };
+      mockArticles.push(newArticle);
+      return newArticle;
     }
 
     const now = new Date().toISOString();
@@ -145,7 +190,8 @@ export class ArticleService {
 
   static async getArticle(id: string): Promise<Article | null> {
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
+      console.log('ArticleService.getArticle: Using mock data (no AWS credentials)');
+      return mockArticles.find(article => article.id === id) || null;
     }
 
     const result = await docClient.send(new GetCommand({
@@ -160,8 +206,14 @@ export class ArticleService {
     console.log('ArticleService.getArticles: Starting with status:', status);
     
     if (!docClient) {
-      console.error('ArticleService.getArticles: No DynamoDB client available');
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
+      console.log('ArticleService.getArticles: Using mock data (no AWS credentials)');
+      let filteredArticles = mockArticles;
+      if (status) {
+        filteredArticles = mockArticles.filter(article => article.status === status);
+      }
+      return filteredArticles.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
     }
 
     const params: {
@@ -379,13 +431,24 @@ export class UserService {
   }
 }
 
+// Mock analytics data
+const mockAnalytics: Analytics = {
+  id: 'daily_today',
+  date: new Date().toISOString().split('T')[0],
+  articlesPublished: 2,
+  totalViews: 239,
+  totalLikes: 19,
+  systemHealth: 99.9,
+};
+
 // Analytics operations
 export class AnalyticsService {
   static async getTodayStats(): Promise<Analytics | null> {
     const today = new Date().toISOString().split('T')[0];
     
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
+      console.log('AnalyticsService.getTodayStats: Using mock data (no AWS credentials)');
+      return mockAnalytics;
     }
 
     const result = await docClient.send(new GetCommand({
@@ -419,7 +482,8 @@ export class AnalyticsService {
     };
 
     if (!docClient) {
-      throw new Error('AWS DynamoDB client not configured. Please check your AWS credentials and environment variables.');
+      console.log('AnalyticsService.updateDailyStats: Using mock data (no AWS credentials)');
+      return analytics;
     }
 
     await docClient.send(new PutCommand({

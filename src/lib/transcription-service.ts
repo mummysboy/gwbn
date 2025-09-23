@@ -37,6 +37,13 @@ async function uploadAudioToS3(audioFile: File): Promise<{ success: boolean; key
     // Create S3 client with enhanced configuration
     const awsConfig = await getAWSConfig();
     const s3Config = await getS3Config();
+    
+    // Check if we have valid AWS credentials
+    if (awsConfig.credentials.accessKeyId === 'fallback-access-key') {
+      console.log('No valid AWS credentials found, skipping S3 upload for development');
+      return { success: true, key: 'mock-audio-key' };
+    }
+    
     const s3Client = new S3Client({
       region: awsConfig.region,
       credentials: awsConfig.credentials,
@@ -205,6 +212,16 @@ async function pollTranscriptionJob(jobName: string, maxAttempts: number = 30): 
 export async function transcribeAudioWithAWS(audioFile: File): Promise<{ success: boolean; transcript?: string; error?: string }> {
   try {
     console.log('Starting AWS Transcribe process...');
+    
+    // Check if we have valid AWS credentials
+    const awsConfig = await getAWSConfig();
+    if (awsConfig.credentials.accessKeyId === 'fallback-access-key') {
+      console.log('No valid AWS credentials found, using fallback transcript');
+      return { 
+        success: true, 
+        transcript: 'This is a fallback transcript for development. Please configure AWS credentials to use real transcription services.' 
+      };
+    }
     
     // Step 1: Upload audio to S3
     const uploadResult = await uploadAudioToS3(audioFile);
