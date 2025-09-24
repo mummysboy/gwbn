@@ -45,8 +45,12 @@ export default function AdminDashboard() {
   const [title, setTitle] = useState('');
   const [images, setImages] = useState<string[]>([]);
 
-  // Debug: Log state changes with instance ID
-  console.log(`[${instanceId}] AdminDashboard render - title:`, title, 'enhancedContent length:', enhancedContent?.length);
+  // Debug: Log state changes with instance ID (only when values change)
+  useEffect(() => {
+    if (title || enhancedContent) {
+      console.log(`[${instanceId}] AdminDashboard render - title:`, title, 'enhancedContent length:', enhancedContent?.length);
+    }
+  }, [title, enhancedContent, instanceId]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
@@ -91,7 +95,7 @@ export default function AdminDashboard() {
     } else {
       console.log(`[${instanceId}] Skipping localStorage load - current state has data or no saved data`);
     }
-  }, [enhancedContent, instanceId, title]); // Include all dependencies as required by ESLint
+  }, []); // Empty dependency array - only run once on mount
 
   // Fetch articles and analytics from API
   useEffect(() => {
@@ -213,10 +217,12 @@ export default function AdminDashboard() {
     console.log(`[${instanceId}] === ADMIN HANDLE ENHANCED COMPLETE ===`);
   }, [instanceId]);
 
-  // Debug: Log when state changes
+  // Debug: Log when state changes (optimized to reduce logging)
   useEffect(() => {
-    console.log(`[${instanceId}] AdminDashboard useEffect - title changed to:`, title);
-    console.log(`[${instanceId}] AdminDashboard useEffect - enhancedContent length:`, enhancedContent?.length);
+    if (title || enhancedContent) {
+      console.log(`[${instanceId}] AdminDashboard useEffect - title changed to:`, title);
+      console.log(`[${instanceId}] AdminDashboard useEffect - enhancedContent length:`, enhancedContent?.length);
+    }
   }, [title, enhancedContent, instanceId]);
 
   // Component lifecycle tracking

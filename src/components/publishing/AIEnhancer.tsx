@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { SparklesIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 
@@ -14,7 +14,7 @@ export default function AIEnhancer({ transcript, notes = '', onEnhanced }: AIEnh
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
 
-  const enhanceContent = async () => {
+  const enhanceContent = useCallback(async () => {
     console.log('AIEnhancer: enhanceContent called');
     console.log('AIEnhancer: transcript:', transcript);
     console.log('AIEnhancer: transcript.trim():', transcript.trim());
@@ -109,7 +109,7 @@ export default function AIEnhancer({ transcript, notes = '', onEnhanced }: AIEnh
     } finally {
       setIsEnhancing(false);
     }
-  };
+  }, [transcript, notes, onEnhanced]);
 
   const generateEnhancedContent = (text: string, notes: string) => {
     const additionalContext = notes.trim() ? `\n\nAdditional Notes: ${notes}` : '';
@@ -128,8 +128,10 @@ Residents can expect to receive more information about the project in the coming
     return { title, content };
   };
 
-  // Debug: Log component state
-  console.log('AIEnhancer: Component render - transcript length:', transcript.length, 'isEnhancing:', isEnhancing, 'hasGenerated:', hasGenerated);
+  // Debug: Log component state (only when values change)
+  React.useEffect(() => {
+    console.log('AIEnhancer: Component render - transcript length:', transcript.length, 'isEnhancing:', isEnhancing, 'hasGenerated:', hasGenerated);
+  }, [transcript.length, isEnhancing, hasGenerated]);
 
   return (
     <div className="space-y-6">
@@ -143,13 +145,7 @@ Residents can expect to receive more information about the project in the coming
       {/* Generate Button */}
       <div className="text-center">
         <Button
-          onClick={() => {
-            console.log('AIEnhancer: Button clicked');
-            console.log('AIEnhancer: isEnhancing:', isEnhancing);
-            console.log('AIEnhancer: transcript.trim():', transcript.trim());
-            console.log('AIEnhancer: Button disabled:', isEnhancing || !transcript.trim());
-            enhanceContent();
-          }}
+          onClick={enhanceContent}
           disabled={isEnhancing || !transcript.trim()}
           className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-8 py-4 rounded-lg text-lg font-semibold shadow-lg"
         >
